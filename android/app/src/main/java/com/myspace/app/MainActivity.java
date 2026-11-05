@@ -32,6 +32,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
@@ -51,6 +52,7 @@ public final class MainActivity extends Activity {
     private static final int REQUEST_SAVE = 1002;
     private static final int MAX_SAVE_BYTES = 8 * 1024 * 1024;
 
+    private FrameLayout root;
     private WebView webView;
     private GeminiBridge bridge;
     private ValueCallback<Uri[]> pendingFileCallback;
@@ -60,9 +62,14 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        root = new FrameLayout(this);
+        root.setBackgroundColor(getResources().getColor(R.color.space_bg));
         webView = new WebView(this);
         configureWebView();
-        setContentView(webView);
+        root.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT));
+        setContentView(root);
         configureWindow();
 
         if (Build.VERSION.SDK_INT >= 30) {
@@ -192,12 +199,13 @@ public final class MainActivity extends Activity {
     }
 
     private void applyInsets() {
-        webView.setOnApplyWindowInsetsListener((view, insets) -> {
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
             if (Build.VERSION.SDK_INT >= 30) {
                 Api30.applyInsets(view, insets);
             }
             return insets;
         });
+        root.requestApplyInsets();
     }
 
     /** Isolated so the API 30+ window classes are never loaded on older devices. */

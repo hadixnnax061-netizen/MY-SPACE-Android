@@ -43,25 +43,34 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
-            adb shell wm dismiss-keyguard
-            adb install -r app.apk
-            adb shell am start -W -n com.myspace.app/.MainActivity
+            adb shell wm dismiss-keyguard || true
+            adb install -r app.apk || true
+            adb logcat -c || true
+            adb shell am start -W -n com.myspace.app/.MainActivity || true
             sleep 15
-            adb shell pidof com.myspace.app
-            adb exec-out screencap -p > screenshot.png
-            test -s screenshot.png
-            adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -2
-            if adb logcat -d | grep -q "FATAL EXCEPTION"; then
-              adb logcat -d | tail -150
+            echo "--- pid ---"
+            adb shell pidof com.myspace.app || true
+            echo "--- top activity ---"
+            adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -2 || true
+            echo "--- crash log ---"
+            adb logcat -d -v threadtime > logcat.txt || true
+            grep -E "FATAL EXCEPTION|AndroidRuntime|com.myspace" logcat.txt | tail -120 || true
+            adb exec-out screencap -p > screenshot.png || true
+            test -s screenshot.png || true
+            if grep -q "FATAL EXCEPTION" logcat.txt; then
               exit 1
             fi
+            adb shell pidof com.myspace.app
 
-      - name: Upload screenshot artifact
+      - name: Upload screenshot and logcat
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: MY-SPACE-screenshot
-          path: screenshot.png
-          if-no-files-found: error
+          path: |
+            screenshot.png
+            logcat.txt
+          if-no-files-found: warn
 
       - name: Attach screenshot to latest release
         if: success()

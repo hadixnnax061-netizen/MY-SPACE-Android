@@ -1107,6 +1107,7 @@ function paintBackgroundField(x,P,t,W,H,cx,cy,r,shape,o){
   for(let i=0;i<n;i++){const a=sr(i+400)*TAU+t*.28,d=r*(1.38+sr(i+401)*1.35),pt=project3DPoint(Math.cos(a)*d,Math.sin(a)*d*.72,Math.sin(a*2+i)*d*.14,view,Math.max(r*4.8,1),depth),sx=cx+pt.x,sy=cy+pt.y,len=r*(.16+ph.spinY*.055)*motion*(.72+.28*Math.sin(t*2+i)),g=x.createLinearGradient(sx,sy,sx-Math.cos(a)*len,sy-Math.sin(a)*len);g.addColorStop(0,rgba(P.c3,streakAlpha));g.addColorStop(1,rgba(P.c3,0));x.strokeStyle=g;x.lineWidth=.7*lw;x.beginPath();x.moveTo(sx,sy);x.lineTo(sx-Math.cos(a)*len,sy-Math.sin(a)*len);x.stroke()}
  }
  if(o.tapFlash>0){const q=Math.max(0,Math.min(1,o.tapFlash)),rr=r*(1+(1-q)*2.15);x.strokeStyle=rgba(P.c3,q*.22*fxM);x.lineWidth=1.15*lw;x.beginPath();x.arc(cx,cy,rr,0,TAU);x.stroke()}
+ if(o.tapFlash>0){const q=Math.max(0,Math.min(1,o.tapFlash));x.save();x.globalCompositeOperation='screen';const bg=x.createRadialGradient(cx,cy,r*.2,cx,cy,r*1.42);bg.addColorStop(0,rgba(P.c3,.12*q*fxM));bg.addColorStop(.55,rgba(P.c1,.045*q*fxM));bg.addColorStop(1,rgba(P.c1,0));x.fillStyle=bg;x.beginPath();x.arc(cx,cy,r*1.42,0,TAU);x.fill();x.restore()}
  x.restore();
 }
 
@@ -1257,7 +1258,7 @@ function draw(c,P,t,rot,bur,o,dt=1,fx=[]){
  const glow=clamp(glowBase*(1+flare*.35+bass*.15+mid*.06)*brM*(soulMood.glowMod||1),0,140);
  const gazePower=clamp(o.gazeIntensity||0,0,1),gazeX=clamp(o.gazeX||0,-1,1)*gazePower,gazeY=clamp(o.gazeY||0,-1,1)*gazePower;
  const globalZoom=clamp((V3.zoom==null?100:V3.zoom)/100,.7,1.4),localZoom=clamp(o.localZoom||1,.62,1.85);
- const R=Math.min(W,H)*.15*(P.size||1)*(o.sc||1)*(o.kickScale||1)*globalZoom*localZoom,r=R*finalPulse,lw=Math.max(.7,W/320);
+ const R=Math.min(W,H)*.15*(P.size||1)*(o.sc||1)*(o.kickScale||1)*(1+(o.press||0)*.025)*globalZoom*localZoom,r=R*finalPulse,lw=Math.max(.7,W/320);
  const TAU=Math.PI*2,fade=clamp(dt,0,2.5),ang=rot+t*(P.speed||0)/100*1.2*phys.spinY+viewRoll*.28+viewYaw*.12;
  x.clearRect(0,0,W,H);
 
@@ -1302,6 +1303,8 @@ function draw(c,P,t,rot,bur,o,dt=1,fx=[]){
  /* Physical dust, shock rings and movement trails sit behind the body. */
  paintBackgroundField(x,P,t,W,H,cx,cy,r,P.shape||'sphere',Object.assign({},o,{viewYaw,viewPitch,viewRoll}));
 
+ /* Touch pressure: a soft coloured bloom that fades after the finger lifts. */
+ {const press=clamp(o.press||0,0,1);if(press>0){x.save();x.globalCompositeOperation='screen';const pr=r*(1.55+press*.9),pg=x.createRadialGradient(cx,cy,r*.72,cx,cy,pr);pg.addColorStop(0,rgba(P.c1,.13*press));pg.addColorStop(.5,rgba(P.c3,.055*press));pg.addColorStop(1,rgba(P.c1,0));x.fillStyle=pg;x.beginPath();x.arc(cx,cy,pr,0,7);x.fill();x.restore()}}
  /* Volumetric aura: three soft shells plus animated plasma filaments. */
  if(aura>0){
   x.save();x.globalCompositeOperation='lighter';x.globalAlpha=brM;
@@ -1643,7 +1646,7 @@ function attach(c,get,o){
  const it={c,get,rot:0,yaw:0,pitch:0,roll:0,yawVel:0,pitchVel:0,rollVel:0,localZoom:1,isDragging:false,bur:[],fx:[],o,t0:Math.random()*5,kick:0,spin:0,spinVel:0,dragTilt:0,tapFlash:0,lastDraw:0,fxAt:0};live.push(it);
  if(typeof ResizeObserver!=='undefined'){it.ro=new ResizeObserver(resize);it.ro.observe(c)}
  if(o.int){
-  const pointers=new Map();let mv=0,held=false,tapStart=null,holdTimer=null,multiPrev=null,lastOne=null;
+  const pointers=new Map();let mv=0,held=false,tapStart=null,holdTimer=null,multiPrev=null,lastOne=null,lastHaptic=0;
   const cfg=()=>S.view3d||{sensitivity:105,inertia:84,depth:72,zoom:100,invertY:false};
   const getMulti=()=>{
    const a=[...pointers.values()];if(a.length<2)return null;
@@ -1659,9 +1662,12 @@ function attach(c,get,o){
    try{c.setPointerCapture(e.pointerId)}catch(_){}
    if(pointers.size===1){
     mv=0;held=false;tapStart={x:e.clientX,y:e.clientY,t:performance.now(),id:e.pointerId};lastOne={x:e.clientX,y:e.clientY,t:performance.now()};
+    it.press=1;haptic(3);
+    {const rr0=c.getBoundingClientRect();pressSfx((e.clientX-rr0.left)/Math.max(1,rr0.width),(e.clientY-rr0.top)/Math.max(1,rr0.height))}
     const press=tapStart;holdTimer=setTimeout(()=>{
      if(pointers.size===1&&tapStart===press&&mv<7){held=true;const rr=c.getBoundingClientRect(),P=it.get();
-      spawnTouchFX(it,P,(press.x-rr.left)/Math.max(1,rr.width),(press.y-rr.top)/Math.max(1,rr.height),'hold');it.kick=.34;it.tapFlash=.55;
+      spawnTouchFX(it,P,(press.x-rr.left)/Math.max(1,rr.width),(press.y-rr.top)/Math.max(1,rr.height),'hold');it.kick=.34;it.tapFlash=.55;it.press=1;
+      haptic([12,30,16]);
       if(o.hold)o.hold();else tapSfx(.5,.35,P);
      }
     },560);
@@ -1686,6 +1692,7 @@ function attach(c,get,o){
     }
     it.spinVel=it.yawVel;
     swipeSfx(dx);lastOne={x:e.clientX,y:e.clientY,t:now};
+    if(step>2&&now-lastHaptic>110){lastHaptic=now;haptic(3)}
     if(step>1){it.dragAccum=(it.dragAccum||0)+step;if(it.dragAccum>19&&now-it.fxAt>72){const rr=c.getBoundingClientRect(),P=it.get();spawnTouchFX(it,P,(e.clientX-rr.left)/Math.max(1,rr.width),(e.clientY-rr.top)/Math.max(1,rr.height),'drag',Math.atan2(dy,dx));it.fxAt=now;it.dragAccum=0}}
    }else if(pointers.size>=2){
     const cur=getMulti();if(multiPrev&&cur){
@@ -1694,6 +1701,7 @@ function attach(c,get,o){
      it.localZoom=Math.max(.62,Math.min(1.85,(it.localZoom||1)*Math.pow(ratio,.92)));
      it.roll+=twist;it.yawVel=pdx*.0045*sensitivity;it.pitchVel=pdy*.004*sensitivity;it.rollVel=twist;
      it.spinVel=it.yawVel;
+     if(Math.abs(ratio-1)>.02&&performance.now()-lastHaptic>140){lastHaptic=performance.now();haptic(4)}
     }
     multiPrev=cur;lastOne=null;
    }
@@ -1704,15 +1712,18 @@ function attach(c,get,o){
    if(pointers.size===1){multiPrev=null;lastOne=null;tapStart=null;held=false;it.isDragging=true;return}
    if(pointers.size===0){
     it.isDragging=false;multiPrev=null;
-    if(!wasMulti&&tapStart&&mv<7&&!held){
-     if(Date.now()-(it.lt||0)<320){it.spin=.65;spinSfx()}it.lt=Date.now();
+    if(!wasMulti&&held){
+     const rr=c.getBoundingClientRect(),px=(e.clientX-rr.left)/Math.max(1,rr.width),py=(e.clientY-rr.top)/Math.max(1,rr.height),P=it.get();
+     spawnTouchFX(it,P,px,py,'hold');it.tapFlash=1;it.kick=.55;it.press=1;releaseSfx();haptic([10,26,14]);
+    }else if(!wasMulti&&tapStart&&mv<7&&!held){
+     if(Date.now()-(it.lt||0)<320){it.spin=.65;spinSfx();haptic([8,22,8])}it.lt=Date.now();
      const rr=c.getBoundingClientRect(),px=(e.clientX-rr.left)/Math.max(1,rr.width),py=(e.clientY-rr.top)/Math.max(1,rr.height),P=it.get(),shape=P.shape||'sphere';
-     spawnTouchFX(it,P,px,py,'tap');it.tapFlash=1;
+     spawnTouchFX(it,P,px,py,'tap');it.tapFlash=1;it.press=1;
      const impacts={sphere:.58,crystal:.34,geo:.42,star:.78,spiral:.48,hole:.22,flower:.45,liquid:.52,jelly:.72,string:.32,mosaic:.38,frag:.62,binary:.48,gear:.28,image:.38,comet:.58,ringed:.4,eclipse:.42,pulsar:.76,nebula:.35,supernova:.84,aurora:.4,lava:.58,eye:.27,clock:.24,tree:.4,hourglass:.32};
      it.kick=impacts[shape]??.46;
      const spins={gear:.92,spiral:.68,binary:.56,star:.68,hole:.18,jelly:.4,comet:.62,ringed:.36,eclipse:.2,pulsar:1.02,nebula:.18,supernova:.8,aurora:.25,lava:.4,eye:.16,clock:.5,tree:.2,hourglass:.28};
      it.spin=spins[shape]||it.spin;
-     try{if(navigator.vibrate)navigator.vibrate(shape==='gear'?[6,20,6]:shape==='hole'||shape==='eclipse'?[12,28,8]:shape==='pulsar'?[5,16,5,16,8]:[8])}catch(_){}
+     haptic(shape==='gear'?[6,20,6]:shape==='hole'||shape==='eclipse'?[12,28,8]:shape==='pulsar'?[5,16,5,16,8]:[8]);
      if(typeof o.tap==='function')o.tap(px,py,P);else tapSfx(px,py,P);
     }
     tapStart=null;held=false;lastOne=null;
@@ -1887,6 +1898,7 @@ function loop(ms){
    try{
     const P=it.get(),vw=Math.max(1,window.innerWidth),vh=Math.max(1,window.innerHeight);
     const tsM=(S.touchScale==null?60:S.touchScale)/100,calmM=S.calm?.15:1;it.o.kickScale=1+(it.kick>0?it.kick*.04*tsM*calmM:0);if(it.kick>0)it.kick=Math.max(0,it.kick-.06*raw);
+    it.o.press=it.press||0;if(it.press>0)it.press=Math.max(0,it.press-.07*raw);
     if(it.spin>.01){it.rot+=it.spin*.22*raw;it.spin*=Math.pow(.94,raw);if(it.spin<.01)it.spin=0}
     if(it.tapFlash>0){it.tapFlash=Math.max(0,it.tapFlash-.034*raw)}
     const inertia=(S.view3d&&S.view3d.inertia!=null?S.view3d.inertia:84)/100;
@@ -2145,6 +2157,7 @@ function comfortPanel(){
   <div class="sl"><div class="row sp"><span>شدة مؤثرات اللمس والوميض</span><span class="mu" id="fxl">${fx}%</span></div><input type="range" min="0" max="100" value="${fx}" oninput="S.fxLevel=+this.value;save();$('#fxl').textContent=this.value+'%'"/></div>
   <div class="sl"><div class="row sp"><span>سطوع الإضاءة</span><span class="mu" id="brl">${br}%</span></div><input type="range" min="20" max="85" value="${br}" oninput="S.bright=+this.value;save();$('#brl').textContent=this.value+'%'"/></div>
   <div class="sl"><div class="row sp"><span>قوة تكبير اللمس</span><span class="mu" id="tsl">${ts}%</span></div><input type="range" min="0" max="100" value="${ts}" oninput="S.touchScale=+this.value;save();$('#tsl').textContent=this.value+'%'"/></div>
+  <div class="row sp" style="margin:12px 0 4px"><span>اهتزاز اللمس</span><button class="chip ${S.haptics!==false?'on':''}" onclick="S.haptics=S.haptics===false?true:false;save();render()">${S.haptics!==false?'مفعّل':'موقوف'}</button></div>
   <div class="sl"><div class="row sp"><span>سرعة توقف الدوران</span><span class="mu" id="sdl">${sd}%</span></div><input type="range" min="40" max="100" value="${sd}" oninput="S.spinDamp=+this.value;save();$('#sdl').textContent=this.value+'%'"/></div>
  </div>`;
 }
@@ -2508,6 +2521,16 @@ function texPresetURL(id,width=512){
  return TEX_CACHE[key];
 }
 function texThumbURL(id){return texPresetURL(id,160)}
+const HARMONIES=[['analog','تناسق'],['contrast','تباين'],['neon','نيون'],['earth','طبيعي']];
+function hexHsl(hex){const n=parseInt(String(hex||'#36e7dc').replace('#',''),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,ss=0,l=(mx+mn)/2;if(mx!==mn){const d=mx-mn;ss=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?((g-b)/d+(g<b?6:0)):mx===g?((b-r)/d+2):((r-g)/d+4);h/=6}return[h*360,ss*100,l*100]}
+function hslHex(h,ss,l){h=((h%360)+360)%360/360;ss=Math.max(0,Math.min(100,ss))/100;l=Math.max(0,Math.min(100,l))/100;const q=l<.5?l*(1+ss):l+ss-l*ss,p=2*l-q,f=t=>{t=(t+1)%1;return t<1/6?p+(q-p)*6*t:t<.5?q:t<2/3?p+(q-p)*(2/3-t)*6:p};const r=Math.round(f(h+1/3)*255),g=Math.round(f(h)*255),b=Math.round(f(h-1/3)*255);return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('')}
+function harmonize(mode){const T=cur()[ST.t];if(!T)return;const[h,ss,l]=hexHsl(T.c1||'#36e7dc');
+ if(mode==='analog'){T.c2=hslHex(h-28,ss*.9,Math.max(18,l*.72));T.c3=hslHex(h+34,Math.min(100,ss*1.05),Math.min(72,l*1.15))}
+ else if(mode==='contrast'){T.c2=hslHex(h+180,Math.max(35,ss*.85),Math.max(20,l*.7));T.c3=hslHex(h+150,Math.min(100,ss*1.1),Math.min(65,l*1.05))}
+ else if(mode==='neon'){T.c2=hslHex(h-40,95,42);T.c3=hslHex(h+60,95,60)}
+ else{T.c2=hslHex(h-18,Math.max(10,ss*.45),Math.max(12,l*.62));T.c3=hslHex(h+42,Math.max(18,ss*.55),Math.min(60,l*.9))}
+ save();render();toast('تم تطبيق تناسق الألوان')}
+function harmonyButtonsHTML(){return HARMONIES.map(([id,name])=>`<button class="chip" onclick="harmonize('${id}')">${name}</button>`).join('')}
 const BG_SCENES=[['deep','عميق'],['nebula','سديم'],['aurora','شفق'],['void','أسود']];
 function setBgScene(id){S.bgScene=id;save();render();toast('خلفية المشهد: '+(BG_SCENES.find(x=>x[0]===id)?.[1]||id))}
 function bgPickerHTML(){return `<h2>خلفية المشهد</h2><div class="row" style="flex-wrap:wrap">${BG_SCENES.map(([id,name])=>`<button class="chip ${(S.bgScene||'deep')===id?'on':''}" onclick="setBgScene('${id}')">${name}</button>`).join('')}</div><div class="mu" style="font-size:10px;margin-top:5px">غيّر النجوم والسديم خلف كوكبك، لا خلفية التطبيق نفسها.</div>`}
@@ -2595,7 +2618,7 @@ function studio(){const s=cur();ST.t='final';s.final=s.forms[s.ti].d;const T=s.f
  h+=`<div class="mu" style="margin:6px 0 10px">${ed?'كل الخيارات مفتوحة الآن. صمّم الشكل النهائي لنجمك ثم ابدأ الرحلة.':'🔒 بدأ نجمك رحلة التطور، فتصميمه مقفل ويُضاف إليه باقي الشكل النهائي مع تقدمك.'}${s.gen?' · المرحلة '+(s.gen+1):''}</div><canvas id="sc"></canvas>`;
  h+=`<div class="sl"><div class="row sp"><span>معاينة التطور: نجمك عند</span><span class="mu" id="pvl">${pv}%</span></div><input type="range" min="0" max="100" value="${pv}" oninput="ST.pv=+this.value;$('#pvl').textContent=this.value+'%'"></div>`;
  h+=`<div class="card"><div class="row sp"><b>الأشكال النهائية (${s.forms.length})</b>`+(ed?`<button class="chip" onclick="addF()">＋ شكل جديد</button>`:'')+`</div><div class="row" style="flex-wrap:wrap;margin:8px 0">`+s.forms.map((f,i)=>`<button class="chip ${i==s.ti?'on':''}" ${ed||i==s.ti?'':'disabled style="opacity:.45"'} onclick="selF(${i})">${f.n}</button>`).join('')+`</div>`+(ed?`<div class="row"><input type="text" value="${s.forms[s.ti].n}" oninput="renF(this.value)"><button class="chip" onclick="delF()">حذف</button></div><div class="mu" style="margin-top:6px">الشكل المحدد هو الذي سيسلكه نجمك. صمّم عدة أشكال ثم اختر واحداً قبل البدء.</div>`:`<div class="mu">الشكل المتّبع: ${s.forms[s.ti].n}</div>`)+`</div><h2>الاسم</h2><input type="text" value="${s.name}" oninput="cur().name=this.value;save()"><h2>الأسطورة الشخصية</h2>${ed?`<textarea rows="3" placeholder="اكتب قصة نجمك أو اضغط ولّد" oninput="cur().legend=this.value;save()">${s.legend||''}</textarea><button class="chip" style="margin-top:6px" onclick="genLegend()">✦ ولّد أسطورة</button>`:`<div class="mu">${s.legend||'—'}</div>`}`;
- if(ed){h+=preUI()+`<h2>الشكل</h2><div class="row" style="flex-wrap:wrap">${Object.keys(SHN).map(k=>`<button class="chip ${T.shape==k?'on':''}" onclick="setP('shape','${k}');render()">${SHN[k]}</button>`).join('')}</div>`+shapeX(T)+lockUI()+`<h2>الطبقات</h2><div class="row" style="flex-wrap:wrap">${[['core','النواة'],['aura','الهالة'],['corona','التوهجات'],['parts','الجسيمات'],['rings','المدارات'],['moons','الأقمار']].map(l=>`<button class="chip ${(T.vis||{})[l[0]]===0?'':'on'}" onclick="tg('${l[0]}')">${l[1]}</button>`).join('')}</div><h2>الألوان</h2><div class="row">${['c1','c2','c3'].map((k,i)=>`<div style="text-align:center"><input type="color" value="${T[k]}" oninput="setP('${k}',this.value)"><div class="mu">${['النواة','الهالة','الجسيمات'][i]}</div></div>`).join('')}</div>${texPickerHTML()}${bgPickerHTML()}<h2>التركيب</h2><div class="sl"><div class="row sp"><span>حجم النواة</span><span class="mu" id="o_size">${Math.round(T.size*100)}</span></div><input type="range" min="50" max="150" value="${Math.round(T.size*100)}" oninput="setP('size',+this.value);$('#o_size').textContent=this.value"></div>${sl('glow','قوة التوهج')}${sl('aura','الهالة')}${sl('parts','كثافة الجسيمات')}${sl('trail','أثر الحركة')}${sl('speed','سرعة الدوران')}${sl('pulse','شدة النبض')}${sl('corona','التوهجات الشمسية')}${sl('rings','عدد المدارات',4)}${sl('moons','عدد الأقمار',5)}<button class="btn" style="width:100%;margin-top:18px" onclick="askStart()">${ST.conf?'تأكيد: ابدأ الآن وأقفل التصميم':'ابدأ رحلة التطور 🚀'}</button><div class="mu" style="margin-top:6px">بعد البدء لا يمكن تعديل تصميم النجم. يبدأ بذرة صغيرة ويُضاف إليه باقي الشكل مع تقدمك.</div>`}
+ if(ed){h+=preUI()+`<h2>الشكل</h2><div class="row" style="flex-wrap:wrap">${Object.keys(SHN).map(k=>`<button class="chip ${T.shape==k?'on':''}" onclick="setP('shape','${k}');render()">${SHN[k]}</button>`).join('')}</div>`+shapeX(T)+lockUI()+`<h2>الطبقات</h2><div class="row" style="flex-wrap:wrap">${[['core','النواة'],['aura','الهالة'],['corona','التوهجات'],['parts','الجسيمات'],['rings','المدارات'],['moons','الأقمار']].map(l=>`<button class="chip ${(T.vis||{})[l[0]]===0?'':'on'}" onclick="tg('${l[0]}')">${l[1]}</button>`).join('')}</div><h2>الألوان</h2><div class="row">${['c1','c2','c3'].map((k,i)=>`<div style="text-align:center"><input type="color" value="${T[k]}" oninput="setP('${k}',this.value)"><div class="mu">${['النواة','الهالة','الجسيمات'][i]}</div></div>`).join('')}</div><div class="row" style="flex-wrap:wrap;gap:6px;margin:8px 0">${harmonyButtonsHTML()}</div>${texPickerHTML()}${bgPickerHTML()}<h2>التركيب</h2><div class="sl"><div class="row sp"><span>حجم النواة</span><span class="mu" id="o_size">${Math.round(T.size*100)}</span></div><input type="range" min="50" max="150" value="${Math.round(T.size*100)}" oninput="setP('size',+this.value);$('#o_size').textContent=this.value"></div>${sl('glow','قوة التوهج')}${sl('aura','الهالة')}${sl('parts','كثافة الجسيمات')}${sl('trail','أثر الحركة')}${sl('speed','سرعة الدوران')}${sl('pulse','شدة النبض')}${sl('corona','التوهجات الشمسية')}${sl('rings','عدد المدارات',4)}${sl('moons','عدد الأقمار',5)}<button class="btn" style="width:100%;margin-top:18px" onclick="askStart()">${ST.conf?'تأكيد: ابدأ الآن وأقفل التصميم':'ابدأ رحلة التطور 🚀'}</button><div class="mu" style="margin-top:6px">بعد البدء لا يمكن تعديل تصميم النجم. يبدأ بذرة صغيرة ويُضاف إليه باقي الشكل مع تقدمك.</div>`}
  else h+=`<h2>متى ظهرت كل ميزة</h2>`+Object.keys(DL).filter(k=>k!='shape').map(k=>`<div class="card"><b>${LKN[k]}</b><div class="mu">${ct(k)}</div></div>`).join('');
  return h}
 function sAfter(){const s=cur();attach($('#sc'),()=>{const k=ST.pv==null?100:ST.pv;return eff(s,{core:k,energy:k,aura:k,orbits:k,particles:k})},{bg:1,int:1,tap:tapSfx,starRef:s})}
@@ -2907,6 +2930,10 @@ function voice(sh,mat,nx,ny,P,s){const A=AC,t=A.currentTime+.005,root=rootOf(s),
 function matSfx(m,t,f,pan){if(m=='glass')tone(f*4,'sine',t,.6,.05,{send:.8,pan});else if(m=='metal'){tone(f*2.76,'triangle',t,.5,.05,{send:.5,pan});tone(f*5.4,'triangle',t,.35,.03,{pan})}else if(m=='gas')noise(t,.7,.06,{f:700,q:.7,att:.2,send:.6,pan});else if(m=='sand'){for(let i=0;i<10;i++)noise(t+i*.045,.03,.05,{f:5000,q:1.5,type:'highpass',pan})}else if(m=='digital'){for(let i=0;i<3;i++)tone(f*(2+i*.5),'square',t+i*.04,.05,.03,{lp:2500,pan})}}
 function holdSfx(){if(!AUI()||!sfxOK())return;const t=AC.currentTime;tone(55,'sine',t,2,.3,{att:.5,fEnd:70});noise(t,1.5,.12,{brown:1,type:'lowpass',f:200,fEnd:900,att:.8,send:.4});tone(rootOf(cur()),'sine',t+.2,1.8,.08,{att:.6,send:.9})}
 function spinSfx(){if(!AUI()||!sfxOK())return;const t=AC.currentTime,r=rootOf(cur());noise(t,.9,.1,{f:400,fEnd:4000,q:1,att:.05,send:.4});tone(r*2,'sawtooth',t,.8,.04,{fEnd:r*4,lp:1200,att:.05,send:.5})}
+function hapticsOn(){return S.haptics!==false}
+function haptic(p){if(!hapticsOn())return;try{if(navigator.vibrate)navigator.vibrate(p)}catch(_){}}
+function pressSfx(nx,ny){if(!AUI()||!sfxOK())return;const t=AC.currentTime;noise(t,.035,.016,{f:1100,q:1.3,pan:(nx-.5)*1.2});tone(135,'sine',t,.09,.03,{fEnd:88})}
+function releaseSfx(){if(!AUI()||!sfxOK())return;const t=AC.currentTime,r=rootOf(cur());tone(r*2,'sine',t,1.2,.065,{att:.02,fEnd:r*3,send:.7});noise(t,.5,.03,{f:1800,q:1.2,att:.12,send:.5})}
 function swipeSfx(dx){const n=performance.now();if(n-lastSw<90||!AUI()||!sfxOK())return;lastSw=n;const a=Math.min(1,Math.abs(dx)/18);noise(AC.currentTime,.14,.05*a+.0002,{f:500+a*1800,q:1.5,att:.02,pan:Math.sign(dx)*.6})}
 function sfxTask(attr){if(!AUI()||!sfxOK())return;const s=cur(),t=AC.currentTime,i=Math.max(0,AO.indexOf(attr)),f=nf(rootOf(s),i+2,1,scOf(s));tone(f,'sine',t,.5,.16,{send:.5});tone(f*1.5,'triangle',t+.08,.6,.12,{send:.6});tone(f*2,'sine',t+.16,.8,.09,{send:.8});tone(200,'sine',t,.12,.12,{fEnd:90})}
 function sfxEvolve(){if(!AUI()||!sfxOK())return;const s=cur(),t=AC.currentTime,r=rootOf(s);tone(58,'sine',t,2.4,.4,{att:.02,fEnd:30});noise(t,1.4,.18,{f:200,fEnd:5000,q:.9,att:1.1,send:.6});[1,1.25,1.5,2,2.5].forEach((m,i)=>tone(r*m*2,i%2?'triangle':'sine',t+.5+i*.09,3,.09,{att:.5,send:.9,pan:(i-2)*.3}));for(let i=0;i<9;i++)tone(r*[8,10,12,15,16][i%5]*(1+i*.01),'sine',t+.6+i*.2,1.2,.04,{send:1,pan:Math.random()*2-1})}

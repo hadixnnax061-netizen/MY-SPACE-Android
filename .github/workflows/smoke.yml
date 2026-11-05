@@ -21,9 +21,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download latest APK
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          curl -fL --retry 3 -o app.apk \
-            https://github.com/hadixnnax061-netizen/MY-SPACE-Android/releases/latest/download/MY-SPACE-v16.1.apk
+          gh release download latest \
+            -R hadixnnax061-netizen/MY-SPACE-Android \
+            -p 'MY-SPACE-v16.1.apk' -O app.apk --clobber
           ls -lh app.apk
 
       - name: Enable KVM

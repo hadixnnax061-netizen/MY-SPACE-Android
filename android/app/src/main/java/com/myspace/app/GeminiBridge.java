@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
  * Every public method is asynchronous: it returns immediately and resolves the
  * page-side promise through window.__myspaceNativeResolve(id, envelope).
  */
-final class GeminiBridge {
+public final class GeminiBridge {
     private static final String TAG = "MySpaceBridge";
     private static final int MAX_PAYLOAD_CHARS = 160 * 1024;
     private static final int MAX_SPEECH_CHARS = 1800;

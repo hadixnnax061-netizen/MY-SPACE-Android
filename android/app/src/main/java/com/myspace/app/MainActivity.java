@@ -58,11 +58,11 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        configureWindow();
 
         webView = new WebView(this);
         configureWebView();
         setContentView(webView);
+        configureWindow();
 
         if (Build.VERSION.SDK_INT >= 30) {
             applyInsets();
@@ -193,7 +193,7 @@ public final class MainActivity extends Activity {
             window.setStatusBarColor(Color.TRANSPARENT);
             window.setNavigationBarColor(Color.TRANSPARENT);
             window.setDecorFitsSystemWindows(false);
-            WindowInsetsController controller = window.getInsetsController();
+            WindowInsetsController controller = window.getDecorView().getWindowInsetsController();
             if (controller != null) {
                 controller.setSystemBarsAppearance(0,
                         WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS

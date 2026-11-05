@@ -57,12 +57,10 @@ jobs:
             adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -2 || true
             echo "--- crash log ---"
             adb logcat -d -v threadtime > logcat.txt || true
-            grep -E "FATAL EXCEPTION|AndroidRuntime|com.myspace" logcat.txt | tail -120 || true
+            grep -E "FATAL EXCEPTION|AndroidRuntime|com.myspace|MySpace|MYSPACE" logcat.txt | tail -160 || true
             adb exec-out screencap -p > screenshot.png || true
             test -s screenshot.png || true
-            if grep -q "FATAL EXCEPTION" logcat.txt; then
-              exit 1
-            fi
+            grep -q "FATAL EXCEPTION" logcat.txt && exit 1 || true
             adb shell pidof com.myspace.app
 
       - name: Upload screenshot and logcat

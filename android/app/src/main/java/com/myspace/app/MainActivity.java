@@ -20,6 +20,7 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.MimeTypeMap;
 import android.webkit.ValueCallback;
@@ -93,6 +94,11 @@ public final class MainActivity extends Activity {
             }
 
             @Override
+            public void onPageFinished(WebView view, String url) {
+                Log.i(TAG, "MYSPACE_PAGE_FINISHED " + url);
+            }
+
+            @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 if (request != null && request.isForMainFrame()) {
                     toast("تعذّر تحميل التطبيق. أعد تثبيت الحزمة ثم حاول مجدداً.");
@@ -105,6 +111,13 @@ public final class MainActivity extends Activity {
             public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
                                              FileChooserParams params) {
                 return openFileChooser(callback, params);
+            }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage message) {
+                Log.i(TAG, "MYSPACE_CONSOLE " + message.messageLevel() + ": "
+                        + message.message() + " @" + message.lineNumber());
+                return true;
             }
 
             @Override

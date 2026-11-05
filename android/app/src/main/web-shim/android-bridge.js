@@ -11,6 +11,7 @@
   if (!NATIVE) return;
 
   window.__MYSPACE_ANDROID__ = true;
+  console.log('MYSPACE_BRIDGE_READY');
 
   /* Assets are baked into the APK; a stale service-worker cache would hide
      updates shipped in a new APK, so registration is disabled here. */
@@ -181,6 +182,36 @@
       }
     } catch (e) {}
   }, true);
+
+  /* The packaged app initialises its data layer asynchronously. On some older
+     WebView builds that promise can stall (IndexedDB) and leave the shell with
+     only the star background. Re-render once the script has had time to load. */
+  window.addEventListener('error', function (event) {
+    console.error('MYSPACE_WINDOW_ERROR', event.message,
+      event.filename, event.lineno);
+  });
+  window.addEventListener('unhandledrejection', function (event) {
+    var reason = event.reason;
+    console.error('MYSPACE_UNHANDLED_REJECTION',
+      reason && (reason.stack || reason.message || String(reason)));
+  });
+
+  function forceInitialRender(attempt) {
+    try {
+      var nav = document.getElementById('nav');
+      if (!nav || nav.children.length > 0) return;
+      if (typeof render !== 'function') return;
+      console.log('MYSPACE_FORCE_RENDER attempt=' + attempt);
+      if (typeof ensureWidgets === 'function') ensureWidgets();
+      if (typeof applyUIPrefs === 'function') applyUIPrefs();
+      render();
+    } catch (e) {
+      console.error('MYSPACE_FORCE_RENDER_FAILED',
+        e && (e.stack || e.message || String(e)));
+    }
+  }
+  setTimeout(function () { forceInitialRender(1); }, 2000);
+  setTimeout(function () { forceInitialRender(2); }, 5000);
 
   /* Let the native back button return to the home view before leaving. */
   window.__myspaceAndroidBack = function () {

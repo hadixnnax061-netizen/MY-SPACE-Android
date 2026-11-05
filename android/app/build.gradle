@@ -1,0 +1,111 @@
+plugins {
+    id 'com.android.application'
+}
+
+def keystorePropsFile = rootProject.file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
+def envStore = System.getenv('MYSPACE_KEYSTORE')
+def hasSigning = (envStore != null && !envStore.trim().isEmpty()) || keystorePropsFile.exists()
+
+android {
+    namespace 'com.myspace.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.myspace.app'
+        minSdk 24
+        targetSdk 35
+        versionCode 16010
+        versionName '16.1.0'
+    }
+
+    signingConfigs {
+        if (hasSigning) {
+            release {
+                def storePath = (envStore != null && !envStore.trim().isEmpty())
+                        ? envStore.trim()
+                        : keystoreProps.getProperty('storeFile')
+                def storePassword = System.getenv('MYSPACE_KEYSTORE_PASSWORD')
+                        ?: keystoreProps.getProperty('storePassword')
+                def alias = System.getenv('MYSPACE_KEY_ALIAS')
+                        ?: keystoreProps.getProperty('keyAlias')
+                def keyPassword = System.getenv('MYSPACE_KEY_PASSWORD')
+                        ?: keystoreProps.getProperty('keyPassword')
+                if (!storePath || !storePassword || !alias || !keyPassword) {
+                    throw new GradleException('Incomplete release signing configuration.')
+                }
+                storeFile rootProject.file(storePath)
+                storePassword storePassword
+                keyAlias alias
+                keyPassword keyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig hasSigning ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+def webRoot = rootProject.file('../web')
+def generatedWebParent = new File(layout.buildDirectory.get().asFile, 'generated/web')
+def generatedWebDir = new File(generatedWebParent, 'www')
+def shimDir = file('src/main/web-shim')
+
+tasks.register('syncWebAssets', Sync) {
+    from(webRoot) {
+        include 'index.html'
+        include 'manifest.webmanifest'
+        include 'sw.js'
+        include 'icons/**'
+    }
+    from(shimDir) {
+        include 'android-bridge.js'
+    }
+    into generatedWebDir
+    outputs.upToDateWhen { false }
+
+    doLast {
+        File index = new File(generatedWebDir, 'index.html')
+        String html = index.getText('UTF-8')
+
+        String tag = '<script src="android-bridge.js"></script>'
+        if (!html.contains(tag)) {
+            int head = html.indexOf('<head>')
+            if (head < 0) {
+                throw new GradleException('index.html does not contain a <head> tag')
+            }
+            html = html.substring(0, head + 6) + '\n' + tag + html.substring(head + 6)
+        }
+
+        // The packaged app stores the key in the Android Keystore, not in a
+        // local Python server's .env, so keep the settings copy truthful.
+        html = html.replace(
+                'سيُحفظ على هذا الكمبيوتر بواسطة الخادم المحلي، ثم يُختبر الاتصال تلقائياً.',
+                'سيُحفظ مشفّراً داخل التطبيق، ثم يُختبر الاتصال تلقائياً.')
+        html = html.replace(
+                'لأمانك: لا تضع المفتاح في المحادثة ولا تشاركه. يتم إرساله إلى الخادم المحلي على هذا الكمبيوتر وحفظه في ملف .env بصلاحيات خاصة، ولا يُعاد إرساله إلى واجهة المتصفح. إدخال المفتاح متاح من الكمبيوتر الذي يشغّل الخادم فقط.',
+                'لأمانك: لا تضع المفتاح في المحادثة ولا تشاركه. يُخزَّن مشفّراً على هذا الجهاز بمفتاح Android Keystore، ولا يُعاد إرساله إلى واجهة التطبيق.')
+
+        index.setText(html, 'UTF-8')
+    }
+}
+
+android.sourceSets.main.assets.srcDirs += [generatedWebParent]
+tasks.matching {
+    it.name == 'preBuild' || it.name == 'mergeDebugAssets' || it.name == 'mergeReleaseAssets'
+}.configureEach {
+    dependsOn 'syncWebAssets'
+}

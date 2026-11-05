@@ -225,6 +225,42 @@
     }
   }, true);
 
+  /* Native passes the system navigation-bar inset (in CSS pixels). The page
+     pads the bottom nav itself so its background reaches the screen edge. */
+  window.__myspaceInsets = function (bottom) {
+    var value = Math.max(0, Number(bottom) || 0);
+    try {
+      document.documentElement.style.setProperty('--android-nav-bottom', value + 'px');
+    } catch (e) {}
+  };
+
+  /* Keep the home-screen planet widget in sync with the active star. */
+  function syncPlanetWidget() {
+    try {
+      if (typeof cur !== 'function' || typeof avg !== 'function') return;
+      var star = cur();
+      if (!star) return;
+      var look = (typeof eff === 'function') ? eff(star) : (star.base || {});
+      if (!look || !look.c1) return;
+      var data = {
+        name: String(star.name || 'MY SPACE').slice(0, 60),
+        pct: Math.round(avg(star)),
+        stage: (typeof STG !== 'undefined' && typeof stage === 'function')
+          ? String(STG[stage(star)] || '') : '',
+        c1: look.c1,
+        c2: look.c2,
+        c3: look.c3,
+        shape: look.shape || 'sphere'
+      };
+      NATIVE.widgetData(JSON.stringify(data));
+    } catch (e) {}
+  }
+  setTimeout(syncPlanetWidget, 5000);
+  setInterval(syncPlanetWidget, 30000);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) syncPlanetWidget();
+  });
+
   /* Let the native back button return to the home view before leaving. */
   window.__myspaceAndroidBack = function () {
     try {

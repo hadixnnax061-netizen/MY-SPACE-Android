@@ -482,6 +482,37 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;bac
 
 /* Touch should not leave a focus ring around the interactive cosmos. */
 canvas.interactive-3d:focus,canvas.interactive-3d:focus-visible{outline:none!important}
+
+/* ===== v16.2: OLED black, edge-to-edge nav, home-screen widget ===== */
+:root{--bg:#000!important;--pn:#000!important;--ln:#1b1b1b!important;--android-nav-bottom:0px}
+html,body{background:#000!important;padding-bottom:0!important}
+body{background:#000!important}
+body::before{display:none!important}
+#app{background:#000!important;box-shadow:none!important;border-color:#161616!important}
+.hero-stage{background:#000!important;border-color:#1e1e1e!important;box-shadow:none!important}
+.hero-stage::before,.hero-stage::after{display:none!important}
+#cosmos-sky{background:#000!important}
+nav{background:#000!important;border-top:1px solid #1c1c1c!important;backdrop-filter:none!important;padding-bottom:var(--android-nav-bottom,0px)!important}
+.card,.task-card,.task-form,.gemini-connection,.gemini-key-box,.texter-card,.texter-note,.texter-input,.sticky-preview,.widgets-intro,.widget-board,.quick-actions,.compare-tile,.timeline,.log-list,.hero-hint,.page-head,.section-heading{background:#000!important}
+
+/* Flatten every content surface to true black (OLED) */
+.soul-whisper,.soul-ritual,.thought-bubble,.cta-card,.compare-tile,.achievement-tile,.note-card,.info-footnote,.settings-block,.widget-editor,.widget-preview-frame,.wg,.widgets-intro,.widget-board,.texter-input,.card,.task-card,.task-form,.gemini-connection,.gemini-key-box,.texter-card,.texter-note,.quick-actions,.timeline,.log-list,.hero-hint,.page-head,.section-heading{background:#000!important;background-image:none!important;box-shadow:none!important}
+
+/* Streak-inspired insights and daily note */
+.insights-card{margin:14px 0;padding:14px;border:1px solid var(--ln);border-radius:var(--r-lg);background:#000!important}
+.insights-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.insights-head h2{margin:2px 0 0;font-size:17px}
+.insights-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:12px 0 10px}
+.insights-grid div{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid #1e1e1e;border-radius:12px;padding:8px 3px;background:#000}
+.insights-grid b{font-size:18px;color:var(--cy)}
+.insights-grid span{font-size:9px;color:var(--mu);text-align:center}
+.insight-bars{display:flex;align-items:flex-end;gap:3px;height:58px;padding:8px 0 0;border-top:1px solid #1c1c1c}
+.insight-bars i{flex:1;min-height:6px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--cy),#0a3d3d);opacity:.8}
+.insights-foot{font-size:9px;color:var(--mu);margin-top:6px;text-align:center}
+.day-note-card{margin:14px 0;padding:14px;border:1px solid var(--ln);border-radius:var(--r-lg);background:#000!important}
+.day-note-card h2{margin:2px 0 8px;font-size:17px}
+.day-note-input{width:100%;min-height:78px;padding:11px 12px;border:1px solid #262626;border-radius:12px;background:#000;color:var(--tx);font:inherit;font-size:13px;line-height:1.8;resize:vertical;outline:none}
+.day-note-input:focus{border-color:var(--cy)}
 </style></head><body>
 <canvas id="cosmos-sky" aria-hidden="true"></canvas>
 <div id="app"><main id="v"></main>
@@ -1879,6 +1910,26 @@ function progressRing(s,pct,st){
 }
 function emptyState(icon,title,sub,action,actionLabel){return `<div class="empty-state"><div class="empty-orb">${icon}</div><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div>${action?`<button class="btn btn-block" style="margin-top:12px" onclick="${action}">${actionLabel||'ابدأ'}</button>`:''}</div>`}
 function hint(s){let b=null;for(const k in s.prog)if(s.prog[k]<100&&(!b||s.prog[k]<s.prog[b]))b=k;if(!b)return'اكتمل شكل نجمك النهائي.';const th=nextTh(s.prog[b]);return`التحول القادم: ${UNL[b]} — ينقصك ${Math.ceil(th-s.prog[b])}% في ${ATT[b]}`}
+function insightBars(s){
+ const tasks=(s&&s.tasks)||[],days=[];
+ for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=localDateKey(d);let n=0;tasks.forEach(t=>{if(taskDates(t).includes(key))n++});days.push({key,n})}
+ const max=Math.max(1,...days.map(x=>x.n));
+ const total=tasks.reduce((a,t)=>a+taskDates(t).length,0);
+ const best=Math.max(0,...tasks.map(t=>taskStreak(t).best));
+ const current=Math.max(0,...tasks.map(t=>taskStreak(t).current));
+ const doneToday=tasks.filter(t=>taskDates(t).includes(today())||(t.once&&t.n>0)).length;
+ const rate=tasks.length?Math.round(doneToday/tasks.length*100):0;
+ return `<section class="insights-card"><div class="insights-head"><div><div class="brand-kicker">STREAK · INSIGHTS</div><h2>نبض رحلتك</h2></div><span class="badge">${rate}% اليوم</span></div><div class="insights-grid"><div><b>${total}</b><span>إنجاز كلي</span></div><div><b>${best}</b><span>أفضل سلسلة</span></div><div><b>${current}</b><span>سلسلة حالية</span></div><div><b>${doneToday}/${tasks.length}</b><span>مهام اليوم</span></div></div><div class="insight-bars">${days.map(d=>`<i style="height:${Math.max(6,Math.round(d.n/max*100))}%" title="${d.key}: ${d.n}"></i>`).join('')}</div><div class="insights-foot">آخر 14 يوماً · ${days.reduce((a,d)=>a+d.n,0)} إنجازاً</div></section>`;
+}
+function dayNoteCard(){
+ const key=today(),notes=S.dayNotes||{},text=notes[key]||'';
+ return `<section class="day-note-card"><div class="row sp"><div><div class="brand-kicker">TODAY · NOTE</div><h2>ملاحظة اليوم</h2></div><span class="mu">${key}</span></div><textarea class="day-note-input" maxlength="500" dir="auto" placeholder="كيف كان يومك؟ سجّل سطراً…" oninput="setDayNote(this.value)">${soulEsc(text)}</textarea><div class="mu" style="font-size:9px;margin-top:5px">تُحفظ تلقائياً على جهازك.</div></section>`;
+}
+function setDayNote(v){
+ const key=today();S.dayNotes=Object.assign({},S.dayNotes||{});const text=String(v||'').slice(0,500);
+ if(text.trim())S.dayNotes[key]=text;else delete S.dayNotes[key];
+ save();
+}
 function home(){
  const s=cur(),soul=beginSoulSession(cur()),mood=MOODS[soul.mood]||MOODS.calm,tk=s.tasks.slice(0,3),pct=Math.round(avg(s)),st=stage(s);
  return `<section class="hero-wrap">
@@ -1895,7 +1946,7 @@ function home(){
    ${s.started?(avg(s)>=99.5?`<button class="btn btn-block stage-cta" onclick="advance()">ارتقِ إلى مرحلة جديدة ✦</button>`:''):`<div class="card cta-card"><div class="cta-title">لم تبدأ الرحلة بعد</div><div class="mu">صمّم شكلك النهائي ثم ابدأ تطوير نجمك.</div><button class="btn btn-block" style="margin-top:12px" onclick="setV('studio')">افتح الاستوديو</button></div>`}
    <div class="interaction-hint">اسحب أفقياً للدوران وعمودياً للإمالة <span>·</span> إصبعان للتقريب واللف <span>·</span> اضغط مطولاً لشحنه</div>
  </section>
- ${progressRing(s,pct,st)}
+ ${progressRing(s,pct,st)}${insightBars(s)}${dayNoteCard()}
  ${homeWidgets()}
  ${idleNote()}
  <div class="card hero-hint"><div class="hint-kicker">التحول القادم</div><div>${hint(s)}</div></div>
@@ -2048,7 +2099,7 @@ function appendAiError(message){const safe=String(message||'تعذّر الات�
 
 function chat(){const s=cur();ensureChatSession();
  const kind=geminiKind(),who=kind==='planet'?'كوكبك':'نجمك';
- return `<div class="page-head"><div><div class="brand-kicker">GEMINI · COSMIC DIALOGUE</div><h1>${s.name}</h1><div class="mu">حوار حيّ مع ${who}</div></div><div class="chat-controls"><select id="ps" onchange="S.pers=this.value;save()"><option value="calm">هادئ</option><option value="explore">استكشافي</option><option value="sci">علمي</option></select><label class="mu"><input type="checkbox" ${S.voice?'checked':''} onchange="S.voice=this.checked;save()"> صوت Google</label></div></div>
+ return `<div class="page-head"><div><div class="brand-kicker">GEMINI · COSMIC DIALOGUE</div><h1>${s.name}</h1><div class="mu">حوار حيّ مع ${who}</div></div><div class="chat-controls"><select id="ps" onchange="S.pers=this.value;save()"><option value="calm">هادئ</option><option value="explore">استكشافي</option><option value="sci">علمي</option></select></div></div>
  <div class="gemini-talkers"><button class="chip ${kind==='star'?'on':''}" onclick="setGeminiTalker('star')">✦ التحدث مع النجم</button><button class="chip ${kind==='planet'?'on':''}" onclick="setGeminiTalker('planet')">🪐 التحدث مع الكوكب</button></div>
  <div class="gemini-connection" style="margin:0 0 10px"><i class="gemini-led offline" id="gemini-chat-led"></i><div class="gemini-status-text" id="gemini-chat-status">يجري فحص اتصال Gemini…</div></div>
  <div class="gemini-chat-note">ردود جديدة من Google Gemini · سياق مستقل لكل نجم ولكل شخصية</div>
@@ -2066,7 +2117,7 @@ async function ask(q){
   const answer=await requestGeminiReply(s,kind);
   ST.chat.push({w:'st',t:answer,ai:true,character:kind});
   const soul=ensureSoul(s);if(soul){soul.interactions=(soul.interactions||0)+1;soul.chats=(soul.chats||0)+1;soul.lastChatAt=Date.now();soul.recentQuestions=soul.recentQuestions||[];soul.recentQuestions.push({d:today(),q:q.slice(0,120)});if(soul.recentQuestions.length>12)soul.recentQuestions.shift();soul.recentConversations=soul.recentConversations||[];soul.recentConversations.push({d:today(),q:q.slice(0,100),a:answer.slice(0,180)});if(soul.recentConversations.length>12)soul.recentConversations.shift()}
-  ST.geminiBusy=false;persistActiveChat();render();if(S.voice)speakGemini(answer,kind);$('#v').scrollTop(1e5);
+  ST.geminiBusy=false;persistActiveChat();render();$('#v').scrollTop(1e5);
  }catch(e){ST.geminiBusy=false;appendAiError(e.message||'حدث خطأ غير متوقع');render();$('#v').scrollTop(1e5)}
 }
 /* universe */
@@ -2108,7 +2159,7 @@ function view3DPanel(){
 /* ===== v10 · configurable mini-app widgets ===== */
 const WIDGET_TYPES={progress:'تقدم النجم',today:'مهام اليوم',quick:'إنجاز سريع',streak:'الاستمرارية',activity:'خريطة النشاط',planet:'الكوكب ثلاثي الأبعاد',clock:'الساعة'};
 function defaultWidget(type='progress'){const n=Object.keys(WIDGET_TYPES).indexOf(type);return{id:'w'+Date.now()+Math.floor(Math.random()*9999),type,title:WIDGET_TYPES[type]||'مصغّر جديد',size:type==='planet'?'medium':'small',enabled:true,accent:'#36e7dc',bg:'#0b1a20',opacity:92,radius:20,border:true,showTitle:true,showFoot:true,showPercent:true,starId:cur()?.id||null,bgImage:''}}
-function ensureWidgets(){if(!Array.isArray(S.widgets))S.widgets=[];S.uiPrefs=Object.assign({accent:'#36e7dc',font:'Readex Pro',scale:100,density:'comfortable',skin:'space',showNavLabels:true},S.uiPrefs||{});if(!S.widgets.length)S.widgets=[defaultWidget('progress'),defaultWidget('quick'),defaultWidget('activity')];S.widgets.forEach(w=>Object.assign(w,defaultWidget(w.type),w));if(!Array.isArray(S.texterNotes))S.texterNotes=[];if(typeof S.texterDraft!=='string')S.texterDraft='';if(S.texterVoice!=='planet'&&S.texterVoice!=='star')S.texterVoice='star';}
+function ensureWidgets(){if(!Array.isArray(S.widgets))S.widgets=[];S.uiPrefs=Object.assign({accent:'#36e7dc',font:'Readex Pro',scale:100,density:'comfortable',skin:'space',showNavLabels:true},S.uiPrefs||{});if(!S.widgets.length)S.widgets=[defaultWidget('progress'),defaultWidget('quick'),defaultWidget('activity')];S.widgets.forEach(w=>Object.assign(w,defaultWidget(w.type),w));S.voice=false;if(!S.dayNotes||typeof S.dayNotes!=="object")S.dayNotes={};if(!Array.isArray(S.texterNotes))S.texterNotes=[];if(typeof S.texterDraft!=='string')S.texterDraft='';if(S.texterVoice!=='planet'&&S.texterVoice!=='star')S.texterVoice='star';}
 function widgetStar(w){return S.stars.find(x=>x.id===w.starId)||cur()}
 function widgetCount(s){const all=s.tasks||[],doneN=all.filter(t=>taskDates(t).includes(today())||(t.once&&t.n>0)).length;return{total:all.length,done:doneN,left:Math.max(0,all.length-doneN)}}
 function activityLevels(s){const dates={};(s.tasks||[]).forEach(t=>taskDates(t).forEach(d=>dates[d]=(dates[d]||0)+1));const cells=[];for(let i=27;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const k=localDateKey(d),v=dates[k]||0;cells.push(`<i title="${k}: ${v}" class="${v>=3?'a3':v==2?'a2':v==1?'a1':''}"></i>`)}return cells.join('')}
@@ -2129,13 +2180,20 @@ function widgetCard(w,editing=false){const s=widgetStar(w),n=Math.round(avg(s)),
 function homeWidgets(){ensureWidgets();const a=S.widgets.filter(w=>w.enabled).slice(0,2);if(!a.length)return'';return `<div class="section-heading"><h2 style="margin:17px 0 7px">مصغّراتك</h2><button class="text-link" onclick="setV('widgets')">تخصيص الكل ←</button></div><div class="widget-board home-widget-board">${a.map(w=>widgetCard(w)).join('')}</div>`}
 function openWidgetDialogue(starId,kind){const star=S.stars.find(x=>x.id===starId);if(!star)return;persistActiveChat();S.cur=star.id;ST.talker=kind==='planet'?'planet':'star';ST.chatKey='';save();setV('chat')}
 function attachWidgetPlanets(){document.querySelectorAll('.widget-planet').forEach(c=>{const id=c.id.slice(7),w=S.widgets.find(q=>q.id===id),s=w?widgetStar(w):cur();if(s)attach(c,()=>eff(s),{sc:1.05,starRef:s})});document.querySelectorAll('[id^="miniClock_"]').forEach(e=>{e.textContent=new Date().toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})})}
+function requestPlanetWidget(){
+ try{
+  if(window.MYSPACE_NATIVE&&MYSPACE_NATIVE.pinPlanetWidget){MYSPACE_NATIVE.pinPlanetWidget();return}
+ }catch(_){}
+ toast('من الشاشة الرئيسية: اضغط مطولاً ثم «الودجات» وأضف «كوكب MY SPACE».');
+}
 function widgetsPage(){ensureWidgets();const selected=S.widgets.find(w=>w.id===ST.widgetEdit),enabled=S.widgets.filter(w=>w.enabled);return `<div class="page-head"><div><div class="brand-kicker">MY SPACE · MINI APPS</div><h1>مصغّراتك</h1><div class="mu">رتّب لوحة المعلومات وصمّم كل بطاقة كما تحب</div></div><span class="badge">${enabled.length} ظاهرة</span></div>
+<div class="card"><div class="brand-kicker">HOME SCREEN · WIDGET</div><b>كوكب MY SPACE على شاشتك</b><div class="mu" style="font-size:11px;margin:5px 0 9px">ودجت مستقل يعرض كوكبك وتقدّمك، ويتحدّث مع بيانات التطبيق. أضفه من هنا مباشرة.</div><button class="btn btn-block" onclick="requestPlanetWidget()">أضف ودجت الكوكب</button></div>
 <div class="widgets-intro"><b>لوحتك المصغّرة</b><div class="mu" style="font-size:11px;margin-top:4px">اختر ما تريد رؤيته بسرعة: تقدّم نجمك، مهام اليوم، الاستمرارية أو خريطة نشاطك. كل مصغّر له ألوانه وحجمه وخلفيته.</div></div>
 <div class="widget-adds">${Object.entries(WIDGET_TYPES).map(([k,v])=>`<button class="chip" onclick="addWidget('${k}')">＋ ${v}</button>`).join('')}</div>
 <div class="row sp"><h2 style="margin:10px 0">ترتيب اللوحة</h2><span class="mu">${S.widgets.length} مصغّرات</span></div>
 ${S.widgets.length?`<div class="widget-board">${S.widgets.map(w=>widgetCard(w,true)).join('')}</div>`:emptyState('▦','لوحتك فارغة','أضف أول مصغّر من الأعلى.',null)}
 ${selected?widgetEditor(selected):''}
-<div class="mobile-tip">هذه المصغّرات تفاعلية داخل MY SPACE. لوضعها كودجات مستقلة على شاشة Android الرئيسية يلزم إصدار Android أصلي؛ الملف الحالي يوفّر نسخة الويب ولوحة المصغّرات الجاهزة للتصميم.</div>
+<div class="mobile-tip">المصغّرات هنا تفاعلية داخل MY SPACE. للشاشة الرئيسية استخدم زر «أضف ودجت الكوكب» أعلاه، أو أضف «كوكب MY SPACE» من قائمة الودجات في أندرويد.</div>
 <div class="card"><b>تثبيت MY SPACE على الهاتف</b><div class="mu" style="font-size:11px;margin:5px 0 9px">يمكن تثبيت نسخة الويب كتطبيق على الشاشة الرئيسية عند فتحها من رابط HTTPS مدعوم.</div><button class="btn g btn-block" onclick="installPWA()">إضافة التطبيق إلى الشاشة الرئيسية</button></div>`}
 function widgetEditor(w){return `<div class="widget-editor"><div class="row sp"><h2>تخصيص: ${w.title||WIDGET_TYPES[w.type]}</h2><button class="chip" onclick="ST.widgetEdit=null;render()">إغلاق</button></div>
 <div class="editor-grid">
@@ -2174,6 +2232,12 @@ const COLOR_PRESETS={
  gold:{name:'ذهبي ملكي',bg:'#141008',panel:'#241c0d',line:'#514021',text:'#fff7e5',muted:'#b9a77e',accent:'#e8c36c',secondary:'#a98237',glow:'#c58d4b',warm:'#f0a65c'},
  ice:{name:'جليد قطبي',bg:'#091116',panel:'#12232b',line:'#31505c',text:'#f0fbff',muted:'#9bb8c2',accent:'#a5e9f5',secondary:'#5ba6bb',glow:'#7e9fe0',warm:'#e6cf9b'},
  mono:{name:'أحادي هادئ',bg:'#101214',panel:'#1b1f22',line:'#383e42',text:'#f0f2f3',muted:'#a4adb2',accent:'#d3dde1',secondary:'#77848a',glow:'#9aa5b0',warm:'#c4b9a2'}
+ ,catppuccin:{name:'Catppuccin',bg:'#000000',panel:'#000000',line:'#313244',text:'#cdd6f4',muted:'#a6adc8',accent:'#cba6f7',secondary:'#89b4fa',glow:'#b4befe',warm:'#f9e2af'}
+ ,tokyo:{name:'Tokyo Night',bg:'#000000',panel:'#000000',line:'#2a2e42',text:'#c0caf5',muted:'#9aa5ce',accent:'#7aa2f7',secondary:'#bb9af7',glow:'#7dcfff',warm:'#e0af68'}
+ ,nord:{name:'Nord',bg:'#000000',panel:'#000000',line:'#2e3440',text:'#eceff4',muted:'#a3abb8',accent:'#88c0d0',secondary:'#81a1c1',glow:'#8fbcbb',warm:'#ebcb8b'}
+ ,gruvbox:{name:'Gruvbox',bg:'#000000',panel:'#000000',line:'#3c3836',text:'#ebdbb2',muted:'#bdae93',accent:'#d79921',secondary:'#458588',glow:'#b8bb26',warm:'#fabd2f'}
+ ,rosepine:{name:'Rosé Pine',bg:'#000000',panel:'#000000',line:'#26233a',text:'#e0def4',muted:'#908caa',accent:'#c4a7e7',secondary:'#9ccfd8',glow:'#ebbcba',warm:'#f6c177'}
+
 };
 function activePalette(){const p=S.uiPrefs||{};return Object.assign({},COLOR_PRESETS[p.preset||'space']||COLOR_PRESETS.space,p.palette||{},p.accent?{accent:p.accent}:{});}
 function applyUIPrefs(){const p=S.uiPrefs||{},pal=activePalette(),root=document.documentElement;root.style.setProperty('--ui-scale',String(Math.max(.9,Math.min(1.2,(+p.scale||100)/100))));[['--bg','bg'],['--pn','panel'],['--ln','line'],['--tx','text'],['--mu','muted'],['--cy','accent'],['--te','secondary'],['--ne','glow'],['--go','warm']].forEach(([v,k])=>root.style.setProperty(v,pal[k]));document.body.dataset.skin=(p.palette&&Object.keys(p.palette).length)?'space':(p.skin||'space');document.body.style.background=pal.bg;document.body.style.color=pal.text;document.body.style.fontFamily=p.font==='Tahoma'?'Tahoma,Arial,sans-serif':p.font==='Arial'?'Arial,sans-serif':"'Readex Pro',Tahoma,sans-serif";const app=document.querySelector('#app');if(app){app.classList.toggle('density-compact',p.density==='compact');app.classList.toggle('density-comfortable',p.density!=='compact')}document.querySelectorAll('.nav-btn span').forEach(e=>e.style.display=p.showNavLabels===false?'none':'')} 
@@ -2935,6 +2999,8 @@ function checkAchievements(s){if(!s)return;const earned=s.achievements||(s.achie
 function achievementsSection(){const s=cur();if(!s)return'';const earned=s.achievements||{},count=ACHIEVEMENT_DEFS.filter(a=>earned[a.id]).length;return `<div class="section-heading"><h2>إنجازاتك</h2><span class="mu">${count}/${ACHIEVEMENT_DEFS.length}</span></div><div class="achievement-grid">${ACHIEVEMENT_DEFS.map(a=>{const got=!!earned[a.id];return `<div class="achievement-tile ${got?'unlocked':''}" ${got?'':'aria-disabled="true"'}><div class="achievement-icon">${a.icon}</div><div class="achievement-name">${a.name}</div><div class="achievement-desc">${a.desc}</div></div>`}).join('')}</div>`}
 
 bootDataLayer().then(()=>{ensureWidgets();applyUIPrefs();render()}).catch(()=>{ensureWidgets();applyUIPrefs();render()});
+try{window.tint=()=>[0,0,0,0]}catch(_){}
+
 if('serviceWorker' in navigator && location.protocol!=='file:'){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 </script></body></html>
 

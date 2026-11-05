@@ -175,6 +175,31 @@ public final class GeminiBridge {
         activity.runOnUiThread(() -> activity.openExternalUrl(url));
     }
 
+    @JavascriptInterface
+    public void pinPlanetWidget() {
+        activity.runOnUiThread(() -> activity.requestPlanetWidget());
+    }
+
+    @JavascriptInterface
+    public void widgetData(String payload) {
+        try {
+            JSONObject input = new JSONObject(payload == null ? "{}" : payload);
+            JSONObject clean = new JSONObject();
+            String name = input.optString("name", "MY SPACE");
+            if (name.length() > 60) name = name.substring(0, 60);
+            clean.put("name", name);
+            clean.put("pct", Math.max(0, Math.min(100, input.optInt("pct", 0))));
+            clean.put("stage", input.optString("stage", "").substring(0,
+                    Math.min(40, input.optString("stage", "").length())));
+            clean.put("c1", input.optString("c1", "#36e7dc"));
+            clean.put("c2", input.optString("c2", "#008080"));
+            clean.put("c3", input.optString("c3", "#e0b252"));
+            clean.put("shape", input.optString("shape", "sphere"));
+            PlanetWidgetProvider.store(activity, clean.toString());
+        } catch (Exception ignored) {
+        }
+    }
+
     private String requireKey() throws GeminiClient.ApiException {
         String key = keyStore.load();
         if (key.isEmpty()) {

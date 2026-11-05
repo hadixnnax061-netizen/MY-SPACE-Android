@@ -55,6 +55,9 @@ jobs:
             adb shell pidof com.myspace.app || true
             echo "--- top activity ---"
             adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -2 || true
+            echo "--- widget provider ---"
+            adb shell dumpsys appwidget | grep -i "com.myspace" || true
+            adb shell dumpsys package com.myspace.app | grep -i "PlanetWidgetProvider" || true
             echo "--- crash log ---"
             adb logcat -d -v threadtime > logcat.txt || true
             grep -E "FATAL EXCEPTION|AndroidRuntime|com.myspace|MySpace|MYSPACE" logcat.txt | tail -160 || true

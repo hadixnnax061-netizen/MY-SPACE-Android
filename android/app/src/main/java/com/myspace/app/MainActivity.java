@@ -3,9 +3,11 @@ package com.myspace.app;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.appwidget.AppWidgetManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -54,6 +56,7 @@ public final class MainActivity extends Activity {
 
     private FrameLayout root;
     private WebView webView;
+    private float navInsetCss = 0f;
     private GeminiBridge bridge;
     private ValueCallback<Uri[]> pendingFileCallback;
     private PendingSave pendingSave;
@@ -103,6 +106,7 @@ public final class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 Log.i(TAG, "MYSPACE_PAGE_FINISHED " + url);
+                sendNavInset();
                 view.postDelayed(() -> view.evaluateJavascript(
                         "(function(){try{"
                         + "var a=document.getElementById('app'),v=document.getElementById('v'),n=document.getElementById('nav');"
@@ -215,13 +219,22 @@ public final class MainActivity extends Activity {
     }
 
     private void applyInsets() {
+        final float density = getResources().getDisplayMetrics().density;
         root.setOnApplyWindowInsetsListener((view, insets) -> {
             if (Build.VERSION.SDK_INT >= 30) {
-                Api30.applyInsets(view, insets);
+                navInsetCss = Api30.applyInsets(view, insets, density);
+                sendNavInset();
             }
             return insets;
         });
         root.requestApplyInsets();
+    }
+
+    private void sendNavInset() {
+        if (webView == null) return;
+        webView.evaluateJavascript(
+                "window.__myspaceInsets&&window.__myspaceInsets(" + navInsetCss + ")",
+                null);
     }
 
     /** Isolated so the API 30+ window classes are never loaded on older devices. */
@@ -238,10 +251,14 @@ public final class MainActivity extends Activity {
             }
         }
 
-        static void applyInsets(View view, WindowInsets insets) {
+        static float applyInsets(View view, WindowInsets insets, float density) {
             android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+            boolean imeVisible = insets.isVisible(WindowInsets.Type.ime());
             android.graphics.Insets ime = insets.getInsets(WindowInsets.Type.ime());
-            view.setPadding(0, bars.top, 0, Math.max(bars.bottom, ime.bottom));
+            // Keep the content clear of the keyboard, but let the page's own
+            // bottom nav paint behind the (transparent) system bar.
+            view.setPadding(0, bars.top, 0, imeVisible ? ime.bottom : 0);
+            return imeVisible ? 0f : (bars.bottom / density);
         }
     }
 
@@ -388,6 +405,22 @@ public final class MainActivity extends Activity {
         } catch (Exception e) {
             Log.w(TAG, "Clipboard unavailable", e);
         }
+    }
+
+    public void requestPlanetWidget() {
+        if (Build.VERSION.SDK_INT >= 26) {
+            try {
+                AppWidgetManager manager = AppWidgetManager.getInstance(this);
+                ComponentName provider = new ComponentName(this, PlanetWidgetProvider.class);
+                if (manager.isRequestPinAppWidgetSupported()) {
+                    manager.requestPinAppWidget(provider, null, null);
+                    toast("اختر «إضافة» لتثبيت ودجت الكوكب على الشاشة الرئيسية.");
+                    return;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        toast("اضغط مطولاً على الشاشة الرئيسية ← الودجات ← «كوكب MY SPACE».");
     }
 
     public void openExternalUrl(String url) {

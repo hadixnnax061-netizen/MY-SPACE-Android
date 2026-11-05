@@ -29,19 +29,19 @@ android {
                 def storePath = (envStore != null && !envStore.trim().isEmpty())
                         ? envStore.trim()
                         : keystoreProps.getProperty('storeFile')
-                def storePassword = System.getenv('MYSPACE_KEYSTORE_PASSWORD')
+                def storePass = System.getenv('MYSPACE_KEYSTORE_PASSWORD')
                         ?: keystoreProps.getProperty('storePassword')
-                def alias = System.getenv('MYSPACE_KEY_ALIAS')
+                def aliasName = System.getenv('MYSPACE_KEY_ALIAS')
                         ?: keystoreProps.getProperty('keyAlias')
-                def keyPassword = System.getenv('MYSPACE_KEY_PASSWORD')
+                def keyPass = System.getenv('MYSPACE_KEY_PASSWORD')
                         ?: keystoreProps.getProperty('keyPassword')
-                if (!storePath || !storePassword || !alias || !keyPassword) {
+                if (!storePath || !storePass || !aliasName || !keyPass) {
                     throw new GradleException('Incomplete release signing configuration.')
                 }
-                storeFile rootProject.file(storePath)
-                storePassword storePassword
-                keyAlias alias
-                keyPassword keyPassword
+                storeFile = rootProject.file(storePath)
+                storePassword = storePass
+                keyAlias = aliasName
+                keyPassword = keyPass
             }
         }
     }

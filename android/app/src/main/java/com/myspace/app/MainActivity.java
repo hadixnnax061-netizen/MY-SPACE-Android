@@ -207,6 +207,9 @@ public final class MainActivity extends Activity {
         settings.setUserAgentString(settings.getUserAgentString() + " MYSPACE-Android/16.1");
 
         webView.setBackgroundColor(getResources().getColor(R.color.space_bg));
+        if (Build.VERSION.SDK_INT >= 26) {
+            webView.setDefaultFocusHighlightEnabled(false);
+        }
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setHorizontalScrollBarEnabled(false);
     }

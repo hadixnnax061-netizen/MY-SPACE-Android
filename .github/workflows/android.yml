@@ -73,6 +73,12 @@ jobs:
             echo "apksigner not found; skipping signature print."
           fi
           ls -lh dist
+          echo "--- packaged web assets ---"
+          unzip -l dist/MY-SPACE-v16.1.apk | grep -E 'assets/www/(index.html|android-bridge.js|manifest.webmanifest)'
+          echo "--- permissions ---"
+          if [ -x "$BUILD_TOOLS/aapt" ]; then
+            "$BUILD_TOOLS/aapt" dump badging dist/MY-SPACE-v16.1.apk | grep 'uses-permission'
+          fi
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4

@@ -456,6 +456,29 @@ nav{background:rgba(3,9,14,.74)!important;backdrop-filter:blur(16px);-webkit-bac
 @media(max-width:460px){.gemini-key-row{flex-direction:column}.gemini-key-row .btn{width:100%}}
 
 
+
+/* ===== v16.2: Texter + larger visual stage + texture presets ===== */
+#app{max-width:640px}
+@media(max-width:600px){.hero-canvas{aspect-ratio:5/6}}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 18% 6%,rgba(96,48,190,.26),transparent 46%),radial-gradient(ellipse at 84% 18%,rgba(0,120,140,.22),transparent 48%),radial-gradient(ellipse at 50% 102%,rgba(44,46,150,.24),transparent 55%)}
+.texter-card{margin-top:12px;padding:14px;border:1px solid var(--ln);border-radius:var(--r-xl);background:linear-gradient(160deg,#0b2028f2,#040b10f7);box-shadow:0 14px 40px #0006}
+.texter-input{display:block;width:100%;min-height:240px;margin-top:6px;padding:14px 15px;border:1px solid #2b515a;border-radius:16px;background:#06141a;color:var(--tx);font:inherit;font-size:15px;line-height:1.9;resize:vertical;outline:none}
+.texter-input:focus{border-color:var(--cy);box-shadow:0 0 0 3px #36e7dc1f}
+.texter-meta{display:flex;justify-content:space-between;gap:8px;margin:8px 2px 10px;color:var(--mu);font-size:11px}
+.texter-voices{display:flex;gap:8px;margin:8px 0 10px}
+.texter-voices .chip{flex:1}
+.texter-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.texter-actions .btn{width:100%}
+.texter-actions .btn:last-child{grid-column:1/-1}
+.texter-note{border:1px solid var(--ln);border-radius:14px;padding:12px 13px;margin:9px 0;background:#08161cf2}
+.texter-note p{white-space:pre-wrap;word-break:break-word;line-height:1.85;font-size:13px;margin:7px 0 9px;color:var(--tx)}
+.texter-note-meta{display:flex;justify-content:space-between;gap:8px;color:var(--mu);font-size:10px}
+.tex-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 18px}
+.tex-tile{padding:0;border:1px solid #2b515a;border-radius:14px;overflow:hidden;background:#08161c;color:var(--tx);cursor:pointer;font:inherit}
+.tex-tile img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.tex-tile span{display:block;padding:6px 4px;font-size:10px;text-align:center;color:var(--mu)}
+.tex-tile:active{transform:scale(.98)}
+@media(min-width:700px){.texter-input{min-height:320px}}
 </style></head><body>
 <canvas id="cosmos-sky" aria-hidden="true"></canvas>
 <div id="app"><main id="v"></main>
@@ -1840,10 +1863,10 @@ function celebrateTask(el){if(!el||(window.matchMedia&&window.matchMedia('(prefe
 function celebrateStage(){if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const c=document.createElement('canvas'),dpr=Math.min(devicePixelRatio||1,2);c.className='stage-celebration';c.width=innerWidth*dpr;c.height=innerHeight*dpr;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';document.body.appendChild(c);const x=c.getContext('2d');x.scale(dpr,dpr);const ps=Array.from({length:58},()=>({x:innerWidth/2,y:innerHeight*.42,vx:(Math.random()-.5)*7,vy:(Math.random()-.5)*7-2,life:1,h:[175,45,270][Math.floor(Math.random()*3)]}));let last=performance.now();function frame(now){const dt=Math.min(2,(now-last)/16.67);last=now;x.clearRect(0,0,innerWidth,innerHeight);for(const p of ps){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.1*dt;p.life-=.012*dt;if(p.life>0){x.globalAlpha=p.life;x.fillStyle=`hsl(${p.h},90%,65%)`;x.shadowBlur=12;x.shadowColor=x.fillStyle;x.beginPath();x.arc(p.x,p.y,2.4,0,Math.PI*2);x.fill()}}x.globalAlpha=1;if(ps.some(p=>p.life>0))requestAnimationFrame(frame);else c.remove()}requestAnimationFrame(frame)}
 /* ---------- views ---------- */
 let V='home',ST={t:'base',chat:[],talker:'star',chatKey:'',geminiBusy:false};
-const NAV=[['home','الرئيسية','M3 11 12 3l9 8v10h-6v-6H9v6H3z'],['tasks','المهام','M5 6h14M5 12h14M5 18h14'],['widgets','المصغّرات','M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z'],['studio','التصميم','M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8'],['settings','الإعدادات','M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.1l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.6-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.1-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.6l-.1-.2 1.6-2.8.2.1a1.7 1.7 0 0 0 1.8-.1l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.6 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .1 1.8l.1.2V15z']];
+const NAV=[['home','الرئيسية','M3 11 12 3l9 8v10h-6v-6H9v6H3z'],['tasks','المهام','M5 6h14M5 12h14M5 18h14'],['texter','Texter','M5 5h14M5 9h10M5 13h14M5 17h7'],['widgets','المصغّرات','M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z'],['studio','التصميم','M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8'],['settings','الإعدادات','M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.1l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.6-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.1-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.6l-.1-.2 1.6-2.8.2.1a1.7 1.7 0 0 0 1.8-.1l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.6 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .1 1.8l.1.2V15z']];
 function setV(v){V=v;render();$('#v').scrollTop=0}
 function render(){live.splice(0).forEach(it=>{if(it.ro)it.ro.disconnect();if(it.c){it.c.onpointerdown=it.c.onpointermove=it.c.onpointerup=it.c.onpointercancel=it.c.onlostpointercapture=it.c.onwheel=it.c.ondblclick=null}});const navActive=['uni','tree','chat'].includes(V)?'settings':V;$('#nav').innerHTML=NAV.map(n=>`<button class="nav-btn ${navActive==n[0]?'on':''}" aria-label="${n[1]}" aria-current="${navActive==n[0]?'page':'false'}" onclick="setV('${n[0]}')"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${n[2]}"/></svg><span>${n[1]}</span>${navActive==n[0]?'<i class="nav-dot"></i>':''}</button>`).join('');
- try{checkAchievements(cur())}catch(_){}const m=$('#v');m.innerHTML=({home,studio,tasks,chat,uni,tree,widgets:widgetsPage,settings})[V]();({home:hAfter,studio:sAfter,uni:uAfter,tasks(){},chat:cAfter,tree:treeAfter,widgets:widgetsAfter,settings(){}})[V]();applyUIPrefs()}
+ try{checkAchievements(cur())}catch(_){}const m=$('#v');m.innerHTML=({home,studio,tasks,chat,uni,tree,widgets:widgetsPage,settings,texter:texterPage})[V]();({home:hAfter,studio:sAfter,uni:uAfter,tasks(){},chat:cAfter,tree:treeAfter,widgets:widgetsAfter,settings(){},texter:texterAfter})[V]();applyUIPrefs()}
 function bars(s){const pct=Math.round(avg(s)),st=stage(s);return progressRing(s,pct,st)}
 function progressRing(s,pct,st){
  const C=2*Math.PI*52,off=C-(Math.max(0,Math.min(100,pct))/100)*C;
@@ -1884,7 +1907,7 @@ function home(){
  `;
 }
 function cosmosHomeVisit(){COSMOS.homeVisits++;if(COSMOS.homeVisits%5===0){COSMOS.mirrorUntil=performance.now()+4000}}
-function hAfter(){cosmosHomeVisit();attach($('#hc'),()=>eff(cur()),{bg:1,int:1,tap:tapSfx,starRef:cur(),hold:()=>{holdSfx();const s=cur();toast(STG[stage(s)]+' · '+hint(s))}});document.querySelectorAll('.mc2').forEach(c=>attach(c,()=>c.dataset.k=='now'?eff(cur()):Object.assign({},cur().final),{sc:1.3,starRef:cur()}));attachWidgetPlanets();clk()}
+function hAfter(){cosmosHomeVisit();attach($('#hc'),()=>eff(cur()),{sc:1.22,bg:1,int:1,tap:tapSfx,starRef:cur(),hold:()=>{holdSfx();const s=cur();toast(STG[stage(s)]+' · '+hint(s))}});document.querySelectorAll('.mc2').forEach(c=>attach(c,()=>c.dataset.k=='now'?eff(cur()):Object.assign({},cur().final),{sc:1.3,starRef:cur()}));attachWidgetPlanets();clk()}
 function clk(){const e=$('#clk');if(e)e.textContent=new Date().toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})}
 setInterval(clk,10000);
 function localDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -2082,7 +2105,7 @@ function view3DPanel(){
 /* ===== v10 · configurable mini-app widgets ===== */
 const WIDGET_TYPES={progress:'تقدم النجم',today:'مهام اليوم',quick:'إنجاز سريع',streak:'الاستمرارية',activity:'خريطة النشاط',planet:'الكوكب ثلاثي الأبعاد',clock:'الساعة'};
 function defaultWidget(type='progress'){const n=Object.keys(WIDGET_TYPES).indexOf(type);return{id:'w'+Date.now()+Math.floor(Math.random()*9999),type,title:WIDGET_TYPES[type]||'مصغّر جديد',size:type==='planet'?'medium':'small',enabled:true,accent:'#36e7dc',bg:'#0b1a20',opacity:92,radius:20,border:true,showTitle:true,showFoot:true,showPercent:true,starId:cur()?.id||null,bgImage:''}}
-function ensureWidgets(){if(!Array.isArray(S.widgets))S.widgets=[];S.uiPrefs=Object.assign({accent:'#36e7dc',font:'Readex Pro',scale:100,density:'comfortable',skin:'space',showNavLabels:true},S.uiPrefs||{});if(!S.widgets.length)S.widgets=[defaultWidget('progress'),defaultWidget('quick'),defaultWidget('activity')];S.widgets.forEach(w=>Object.assign(w,defaultWidget(w.type),w));}
+function ensureWidgets(){if(!Array.isArray(S.widgets))S.widgets=[];S.uiPrefs=Object.assign({accent:'#36e7dc',font:'Readex Pro',scale:100,density:'comfortable',skin:'space',showNavLabels:true},S.uiPrefs||{});if(!S.widgets.length)S.widgets=[defaultWidget('progress'),defaultWidget('quick'),defaultWidget('activity')];S.widgets.forEach(w=>Object.assign(w,defaultWidget(w.type),w));if(!Array.isArray(S.texterNotes))S.texterNotes=[];if(typeof S.texterDraft!=='string')S.texterDraft='';if(S.texterVoice!=='planet'&&S.texterVoice!=='star')S.texterVoice='star';}
 function widgetStar(w){return S.stars.find(x=>x.id===w.starId)||cur()}
 function widgetCount(s){const all=s.tasks||[],doneN=all.filter(t=>taskDates(t).includes(today())||(t.once&&t.n>0)).length;return{total:all.length,done:doneN,left:Math.max(0,all.length-doneN)}}
 function activityLevels(s){const dates={};(s.tasks||[]).forEach(t=>taskDates(t).forEach(d=>dates[d]=(dates[d]||0)+1));const cells=[];for(let i=27;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const k=localDateKey(d),v=dates[k]||0;cells.push(`<i title="${k}: ${v}" class="${v>=3?'a3':v==2?'a2':v==1?'a1':''}"></i>`)}return cells.join('')}
@@ -2155,6 +2178,67 @@ function uiColorSet(k,v){S.uiPrefs=S.uiPrefs||{};S.uiPrefs.palette=Object.assign
 function applyColorPreset(id){const preset=COLOR_PRESETS[id];if(!preset)return;S.uiPrefs=S.uiPrefs||{};S.uiPrefs.preset=id;S.uiPrefs.palette={bg:preset.bg,panel:preset.panel,line:preset.line,text:preset.text,muted:preset.muted,accent:preset.accent,secondary:preset.secondary,glow:preset.glow,warm:preset.warm};S.uiPrefs.accent=preset.accent;S.uiPrefs.skin='space';save();applyUIPrefs();render();toast('تم تطبيق لوحة '+preset.name)}
 function resetColorPreset(){applyColorPreset('space')}
 function colorStudio(){const p=S.uiPrefs||{},pal=activePalette(),keys=[['bg','الخلفية'],['panel','البطاقات والأسطح'],['accent','اللون الرئيسي'],['secondary','اللون الثانوي'],['text','النص الأساسي'],['muted','النص الثانوي'],['line','الحدود والفواصل'],['glow','اللون المساند'],['warm','لون التنبيه الدافئ']];return `<section class="color-studio"><div class="color-studio-head"><div><b>استوديو ألوان MY SPACE</b><p>غيّر هوية الواجهة بالكامل مع معاينة فورية، من دون تغيير ألوان الكواكب وخاماتها.</p></div><span class="color-orb">✦</span></div><div class="palette-grid">${Object.entries(COLOR_PRESETS).map(([id,x])=>`<button type="button" class="palette-swatch ${(p.preset||'space')===id?'selected':''}" data-preset="${id}" onclick="applyColorPreset('${id}')"><span class="palette-dots"><i style="background:${x.bg}"></i><i style="background:${x.accent}"></i><i style="background:${x.secondary}"></i><i style="background:${x.glow}"></i></span><b>${x.name}</b></button>`).join('')}</div><div class="color-custom-title"><b>تخصيص كل لون</b><button class="chip" type="button" onclick="resetColorPreset()">استعادة الافتراضي</button></div><div class="color-controls">${keys.map(([k,n])=>`<label class="color-control"><span>${n}<small data-color-name="${k}">${pal[k].toUpperCase()}</small></span><input aria-label="${n}" type="color" value="${pal[k]}" oninput="uiColorSet('${k}',this.value)"></label>`).join('')}</div><div class="color-preview"><div class="preview-top"><i></i><i></i><i></i><span>معاينة مباشرة</span></div><div class="preview-content"><div class="preview-orbit">✦</div><div><b>رحلتك تبدأ من هنا</b><small>ألوان متناسقة · واجهة مريحة</small></div><button type="button">استكشاف</button></div><div class="preview-bars"><i></i><i></i><i></i></div></div><div class="color-note">تُحفظ اختياراتك تلقائياً على هذا الجهاز وتُطبّق على أقسام التطبيق وأزراره وبطاقاته.</div></section>`}
+
+/* ================= TEXTER · مساحة النص ================= */
+let TEXTER_AUDIO=null,TEXTER_URL=null,TEXTER_BUSY=false;
+function texterVoiceName(){return S.texterVoice==='planet'?'صوت الكوكب':'صوت النجم'}
+function texterNoteDate(ts){try{return new Date(ts).toLocaleString('ar',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}catch(_){return ''}}
+function texterPage(){
+ const notes=Array.isArray(S.texterNotes)?S.texterNotes:[];
+ const draft=typeof S.texterDraft==='string'?S.texterDraft:'';
+ const planet=S.texterVoice==='planet';
+ return `<div class="page-head"><div><div class="brand-kicker">TEXTER · مساحة النص</div><h1>اكتب واسمع</h1><div class="mu">مساحة واسعة للكتابة واللصق، مع قراءة صوتية عربية</div></div><span class="badge" id="txBadge">${draft.length}/1800</span></div>
+ <div class="texter-card">
+  <label class="form-label" for="txIn">النص</label>
+  <textarea id="txIn" class="texter-input" dir="auto" spellcheck="true" aria-label="نص Texter" maxlength="1800" placeholder="الصق أو اكتب أي نص هنا… يمكنك قراءته بصوت النجم أو الكوكب." oninput="texterInput(this)">${soulEsc(draft)}</textarea>
+  <div class="texter-meta"><span id="txCount">${draft.length}/1800 حرفاً</span><span>Gemini TTS · ${texterVoiceName()}</span></div>
+  <div class="texter-voices"><button class="chip ${planet?'':'on'}" onclick="texterSetVoice('star')">✦ صوت النجم</button><button class="chip ${planet?'on':''}" onclick="texterSetVoice('planet')">🪐 صوت الكوكب</button></div>
+  <div class="texter-actions"><button class="btn" id="txRead" onclick="texterRead()">▶ اقرأ الآن</button><button class="btn g" onclick="texterStop()">■ إيقاف</button><button class="btn g" onclick="texterCopy()">نسخ النص</button><button class="btn g" onclick="texterSave()">حفظ الملاحظة</button><button class="btn g" onclick="texterClear()">مسح</button></div>
+  <div class="gemini-key-feedback" id="txStatus" aria-live="polite">القراءة تحتاج مفتاح Gemini من الإعدادات. يمكنك الكتابة والحفظ دون اتصال.</div>
+ </div>
+ <div class="section-heading"><h2>ملاحظاتك</h2><span class="mu">${notes.length} محفوظة</span></div>
+ ${notes.length?notes.slice().reverse().map(n=>`<div class="texter-note"><div class="texter-note-meta"><b>${texterNoteDate(n.at)}</b><span>${String(n.t||'').length} حرفاً</span></div><p>${soulEsc(n.t)}</p><div class="row" style="flex-wrap:wrap"><button class="chip" onclick="texterLoad('${n.id}')">تحرير</button><button class="chip" onclick="texterReadNote('${n.id}')">قراءة</button><button class="chip" onclick="texterDelete('${n.id}')">حذف</button></div></div>`).join(''):'<div class="card mu" style="text-align:center">لا ملاحظات بعد. اكتب نصاً واضغط «حفظ الملاحظة».</div>'}
+ `;
+}
+function texterAfter(){const el=document.getElementById('txIn');if(el&&S.texterFocus){S.texterFocus=false;try{el.focus();el.setSelectionRange(el.value.length,el.value.length)}catch(_){}}}
+function texterInput(el){const v=String(el.value||'').slice(0,1800);S.texterDraft=v;save();const n=document.getElementById('txCount'),b=document.getElementById('txBadge');if(n)n.textContent=v.length+'/1800 حرفاً';if(b)b.textContent=v.length+'/1800'}
+function texterSetVoice(kind){S.texterVoice=kind==='planet'?'planet':'star';save();render()}
+function texterCopy(){const t=String(S.texterDraft||'').trim();if(!t){toast('لا يوجد نص لنسخه');return}try{navigator.clipboard.writeText(t);toast('تم نسخ النص')}catch(e){toast('تعذّر النسخ')}}
+function texterSave(){const t=String(S.texterDraft||'').trim();if(!t){toast('اكتب نصاً أولاً');return}if(!Array.isArray(S.texterNotes))S.texterNotes=[];S.texterNotes.push({id:'tx'+Date.now(),t:t.slice(0,1800),at:Date.now()});if(S.texterNotes.length>40)S.texterNotes=S.texterNotes.slice(-40);save();render();toast('حُفظت الملاحظة')}
+function texterLoad(id){const n=(S.texterNotes||[]).find(x=>x.id===id);if(!n)return;S.texterDraft=n.t;S.texterFocus=true;save();render()}
+function texterDelete(id){S.texterNotes=(S.texterNotes||[]).filter(x=>x.id!==id);save();render();toast('حُذفت الملاحظة')}
+function texterClear(){S.texterDraft='';save();render();toast('مُسح النص')}
+function texterStop(silent){if(TEXTER_AUDIO){try{TEXTER_AUDIO.pause();TEXTER_AUDIO.currentTime=0}catch(_){}TEXTER_AUDIO=null}if(TEXTER_URL){try{URL.revokeObjectURL(TEXTER_URL)}catch(_){}TEXTER_URL=null}const st=document.getElementById('txStatus');if(st&&!silent){st.className='gemini-key-feedback';st.textContent='أُوقف الصوت.'}}
+async function texterSpeak(text,kind){
+ const t=String(text||'').trim();
+ if(!t){toast('اكتب نصاً أولاً');return}
+ if(TEXTER_BUSY){toast('جارٍ توليد الصوت…');return}
+ TEXTER_BUSY=true;
+ const btn=document.getElementById('txRead'),st=document.getElementById('txStatus');
+ if(btn)btn.disabled=true;
+ if(st){st.className='gemini-key-feedback';st.textContent='جارٍ توليد الصوت عبر Gemini…'}
+ try{
+  const r=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t.slice(0,1800),character:kind||S.texterVoice}),cache:'no-store'});
+  let d={};try{d=await r.json()}catch(_){}
+  if(!r.ok||!d.audioBase64)throw new Error(d.error||'تعذّر توليد الصوت');
+  texterStop(true);
+  const bytes=Uint8Array.from(atob(d.audioBase64),c=>c.charCodeAt(0));
+  const blob=new Blob([bytes],{type:d.mimeType||'audio/wav'});
+  TEXTER_URL=URL.createObjectURL(blob);
+  TEXTER_AUDIO=new Audio(TEXTER_URL);
+  TEXTER_AUDIO.onended=()=>{if(st){st.className='gemini-key-feedback good';st.textContent='انتهت القراءة.'}};
+  await TEXTER_AUDIO.play();
+  if(st){st.className='gemini-key-feedback good';st.textContent='يُقرأ الآن بصوت '+(kind==='planet'?'الكوكب':'النجم')+'…'}
+ }catch(e){
+  if(st){st.className='gemini-key-feedback bad';st.textContent=String(e.message||e).slice(0,180)}
+  toast('تعذّر صوت Gemini: '+String(e.message||e).slice(0,70));
+  try{speakSoul(t,cur())}catch(_){}
+ }finally{TEXTER_BUSY=false;if(btn)btn.disabled=false}
+}
+function texterRead(){const el=document.getElementById('txIn');texterSpeak(el?el.value:S.texterDraft,S.texterVoice)}
+function texterReadNote(id){const n=(S.texterNotes||[]).find(x=>x.id===id);if(n)texterSpeak(n.t,S.texterVoice)}
+/* ======================================================= */
+
 function settings(){const p=S.uiPrefs||{};soulPrefs();const status=linkedDataHandle?(linkedDataPermission==='granted'?'تم الربط والحفظ التلقائي جاهز':linkedDataPermission==='prompt'?'الملف مربوط، يحتاج إذن كتابة':'الملف مربوط — تحقق من إذن الكتابة'):'لا يوجد ملف خارجي مربوط';return `<div class="page-head"><div><div class="brand-kicker">MY SPACE · CONTROL CENTER</div><h1>الإعدادات</h1><div class="mu">تحكّم بالمظهر والتنقّل والبيانات من مكان واحد</div></div><span class="badge">الإصدار 16.1 · Gemini</span></div>
 <div class="settings-block"><h2>المظهر والمقروئية</h2>${colorStudio()}<div class="editor-grid">
 <label class="editor-field">اللون الرئيسي<input type="color" value="${p.accent||'#36e7dc'}" onchange="uiSet('accent',this.value)"></label>
@@ -2229,6 +2313,50 @@ function shapeX(T){const sl2=(k,l,mx,mn=0)=>`<div class="sl"><div class="row sp"
  return`<h2>تفاصيل السطح والشكل</h2>${T.shape=='sphere'?`<div class="row" style="flex-wrap:wrap;margin-bottom:6px">${Object.keys(SF).map(k=>`<button class="chip ${(T.surf||'smooth')==k?'on':''}" onclick="setP('surf','${k}');render()">${SF[k]}</button>`).join('')}</div>`:''}${sl2('sides','الأضلاع / الرؤوس / البتلات / الأذرع',16,3)}${sl2('detail','كثافة التفاصيل',100)}${sl2('tilt','ميلان المدارات والأقراص',100)}${sl2('neb','سديم الخلفية',100)}${matUI(T)}${sl2('rough','الخشونة (أملس ← صخري)',100)}${sl2('sym','التماثل (فوضوي ← متماثل)',100)}${sl2('temp','الحرارة (بارد ← متوهج)',100)}${sl2('opq','عتامة النواة (شفاف ← معتم)',100)}${sl2('grav','الجاذبية (مدارات بعيدة ← قريبة)',100)}<div class="row" style="margin:8px 0"><button class="chip" onclick="setP('seed',Math.random()*999|0);render()">🎲 نمط جديد (${T.seed})</button></div><h2>صورتك الخاصة</h2><div class="mu" style="margin-bottom:8px">ارفع صورة كوكبك من ملفاتك. يفضّل PNG بخلفية شفافة.</div><div class="row" style="flex-wrap:wrap"><label class="btn g" style="cursor:pointer">رفع صورة<input type="file" accept="image/*" hidden onchange="upTex(this)"></label>${T.tex?`<button class="chip ${T.tmode=='flat'?'':'on'}" onclick="setP('tmode','sphere');render()">ملفوفة ككرة</button><button class="chip ${T.tmode=='flat'?'on':''}" onclick="setP('tmode','flat');render()">كما هي</button><button class="chip" onclick="rmTex()">حذف</button>`:''}</div>`}
 function upTex(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const m=Math.min(1,384/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*m);c.height=Math.round(im.height*m);c.getContext('2d').drawImage(im,0,0,c.width,c.height);const T=cur()[ST.t];T.tex=c.toDataURL('image/png');T.shape='image';save();render();toast('تمت إضافة صورتك كشكل للنجم')};im.onerror=()=>toast('تعذّر قراءة الملف، جرّب صورة PNG أو JPG');im.src=rd.result};rd.readAsDataURL(f)}
 function rmTex(){const T=cur()[ST.t];T.tex='';if(T.shape=='image')T.shape='sphere';save();render()}
+const TEX_PRESETS=[
+ {id:'nebula',name:'سديم',c:['#160f3a','#6a3bd6','#36e7dc']},
+ {id:'ocean',name:'محيط',c:['#031f2c','#007d8a','#7ff5e3']},
+ {id:'lava',name:'حمم',c:['#2a0a05','#b83b0b','#ffd36b']},
+ {id:'ice',name:'جليد',c:['#071a2e','#4f8fb3','#e9fbff']},
+ {id:'sand',name:'رمل',c:['#2a1a0f','#b07d3a','#f4dca6']},
+ {id:'aurora',name:'شفق',c:['#051a16','#0f8f6a','#b06aff']}
+];
+const TEX_CACHE={};
+function texPresetURL(id){
+ if(TEX_CACHE[id])return TEX_CACHE[id];
+ const p=TEX_PRESETS.find(x=>x.id===id)||TEX_PRESETS[0];
+ const c=document.createElement('canvas');c.width=c.height=256;
+ const x=c.getContext('2d');
+ const g=x.createLinearGradient(0,0,256,256);
+ g.addColorStop(0,p.c[0]);g.addColorStop(.55,p.c[1]);g.addColorStop(1,p.c[2]);
+ x.fillStyle=g;x.fillRect(0,0,256,256);
+ for(let i=0;i<16;i++){
+  const cx=Math.random()*256,cy=Math.random()*256,r=22+Math.random()*82;
+  const rg=x.createRadialGradient(cx,cy,0,cx,cy,r);
+  rg.addColorStop(0,p.c[2]+'99');rg.addColorStop(1,'#00000000');
+  x.fillStyle=rg;x.beginPath();x.arc(cx,cy,r,0,7);x.fill();
+ }
+ const img=x.getImageData(0,0,256,256),d=img.data;
+ for(let i=0;i<d.length;i+=4){
+  const n=(Math.random()-.5)*22;
+  d[i]=Math.max(0,Math.min(255,d[i]+n));
+  d[i+1]=Math.max(0,Math.min(255,d[i+1]+n));
+  d[i+2]=Math.max(0,Math.min(255,d[i+2]+n));
+ }
+ x.putImageData(img,0,0);
+ TEX_CACHE[id]=c.toDataURL('image/jpeg',.86);
+ return TEX_CACHE[id];
+}
+function applyTexPreset(id){
+ const T=cur()[ST.t];
+ T.tex=texPresetURL(id);T.shape='image';T.tmode='sphere';
+ save();render();
+ toast('تم تطبيق الخامة: '+(TEX_PRESETS.find(p=>p.id===id)?.name||id));
+}
+function texPickerHTML(){
+ return `<h2>خامات جاهزة</h2><div class="mu" style="margin-bottom:8px">اختر خامة سطحية أكبر للنجم أو الكوكب. تُطبَّق على التبويب الحالي (التصميم أو الشكل النهائي).</div><div class="tex-grid">${TEX_PRESETS.map(p=>`<button class="tex-tile" onclick="applyTexPreset('${p.id}')" aria-label="${p.name}"><img src="${texPresetURL(p.id)}" alt=""><span>${p.name}</span></button>`).join('')}</div>`;
+}
+
 let UH=[],UR=[],ULT=0;
 const PRE=[['شمس',{shape:'star',surf:'smooth',c1:'#ffd36b',c2:'#ff6a1f',c3:'#fff0b0',sides:9,detail:30,glow:90,aura:70,parts:40,neb:30,seed:5}],['عملاق جليدي',{shape:'sphere',surf:'bands',c1:'#bfeaff',c2:'#2a6fb5',c3:'#ffffff',detail:70,glow:35,aura:55,parts:25,neb:40,seed:11}],['عالم الحمم',{shape:'sphere',surf:'cracks',c1:'#5a1c0c',c2:'#8a1d0a',c3:'#ff8a1f',detail:80,glow:60,aura:45,parts:30,neb:35,seed:3}],['قلب بلوري',{shape:'crystal',c1:'#d9c7ff',c2:'#6a3fd1',c3:'#7ff3ff',sides:7,glow:75,aura:60,parts:55,neb:45,seed:9}],['زهرة سديمية',{shape:'flower',c1:'#ff9ad5',c2:'#7a3cff',c3:'#ffe08a',sides:10,detail:60,glow:70,aura:80,parts:60,neb:70,seed:14}],['كوازار',{shape:'hole',c1:'#00cfc1',c2:'#101a40',c3:'#e0b252',tilt:62,glow:80,aura:60,parts:70,neb:55,seed:2}],['مجرة',{shape:'spiral',c1:'#fff2c9',c2:'#3b2a8f',c3:'#6ad0ff',sides:6,detail:55,glow:60,aura:50,parts:30,neb:60,seed:8}],['كوكب أخضر',{shape:'sphere',surf:'land',c1:'#58c27a',c2:'#134c6b',c3:'#e9e2b5',detail:65,glow:30,aura:60,parts:20,neb:25,seed:17}],['شبكة هندسية',{shape:'geo',c1:'#00cfc1',c2:'#0b3b46',c3:'#a8ff7a',sides:5,detail:70,glow:65,aura:35,parts:25,neb:20,seed:6}]];
 
@@ -2303,7 +2431,7 @@ function studio(){const s=cur();ST.t='final';s.final=s.forms[s.ti].d;const T=s.f
  h+=`<div class="mu" style="margin:6px 0 10px">${ed?'كل الخيارات مفتوحة الآن. صمّم الشكل النهائي لنجمك ثم ابدأ الرحلة.':'🔒 بدأ نجمك رحلة التطور، فتصميمه مقفل ويُضاف إليه باقي الشكل النهائي مع تقدمك.'}${s.gen?' · المرحلة '+(s.gen+1):''}</div><canvas id="sc"></canvas>`;
  h+=`<div class="sl"><div class="row sp"><span>معاينة التطور: نجمك عند</span><span class="mu" id="pvl">${pv}%</span></div><input type="range" min="0" max="100" value="${pv}" oninput="ST.pv=+this.value;$('#pvl').textContent=this.value+'%'"></div>`;
  h+=`<div class="card"><div class="row sp"><b>الأشكال النهائية (${s.forms.length})</b>`+(ed?`<button class="chip" onclick="addF()">＋ شكل جديد</button>`:'')+`</div><div class="row" style="flex-wrap:wrap;margin:8px 0">`+s.forms.map((f,i)=>`<button class="chip ${i==s.ti?'on':''}" ${ed||i==s.ti?'':'disabled style="opacity:.45"'} onclick="selF(${i})">${f.n}</button>`).join('')+`</div>`+(ed?`<div class="row"><input type="text" value="${s.forms[s.ti].n}" oninput="renF(this.value)"><button class="chip" onclick="delF()">حذف</button></div><div class="mu" style="margin-top:6px">الشكل المحدد هو الذي سيسلكه نجمك. صمّم عدة أشكال ثم اختر واحداً قبل البدء.</div>`:`<div class="mu">الشكل المتّبع: ${s.forms[s.ti].n}</div>`)+`</div><h2>الاسم</h2><input type="text" value="${s.name}" oninput="cur().name=this.value;save()"><h2>الأسطورة الشخصية</h2>${ed?`<textarea rows="3" placeholder="اكتب قصة نجمك أو اضغط ولّد" oninput="cur().legend=this.value;save()">${s.legend||''}</textarea><button class="chip" style="margin-top:6px" onclick="genLegend()">✦ ولّد أسطورة</button>`:`<div class="mu">${s.legend||'—'}</div>`}`;
- if(ed){h+=preUI()+`<h2>الشكل</h2><div class="row" style="flex-wrap:wrap">${Object.keys(SHN).map(k=>`<button class="chip ${T.shape==k?'on':''}" onclick="setP('shape','${k}');render()">${SHN[k]}</button>`).join('')}</div>`+shapeX(T)+lockUI()+`<h2>الطبقات</h2><div class="row" style="flex-wrap:wrap">${[['core','النواة'],['aura','الهالة'],['corona','التوهجات'],['parts','الجسيمات'],['rings','المدارات'],['moons','الأقمار']].map(l=>`<button class="chip ${(T.vis||{})[l[0]]===0?'':'on'}" onclick="tg('${l[0]}')">${l[1]}</button>`).join('')}</div><h2>الألوان</h2><div class="row">${['c1','c2','c3'].map((k,i)=>`<div style="text-align:center"><input type="color" value="${T[k]}" oninput="setP('${k}',this.value)"><div class="mu">${['النواة','الهالة','الجسيمات'][i]}</div></div>`).join('')}</div><h2>التركيب</h2><div class="sl"><div class="row sp"><span>حجم النواة</span><span class="mu" id="o_size">${Math.round(T.size*100)}</span></div><input type="range" min="50" max="150" value="${Math.round(T.size*100)}" oninput="setP('size',+this.value);$('#o_size').textContent=this.value"></div>${sl('glow','قوة التوهج')}${sl('aura','الهالة')}${sl('parts','كثافة الجسيمات')}${sl('trail','أثر الحركة')}${sl('speed','سرعة الدوران')}${sl('pulse','شدة النبض')}${sl('corona','التوهجات الشمسية')}${sl('rings','عدد المدارات',4)}${sl('moons','عدد الأقمار',5)}<button class="btn" style="width:100%;margin-top:18px" onclick="askStart()">${ST.conf?'تأكيد: ابدأ الآن وأقفل التصميم':'ابدأ رحلة التطور 🚀'}</button><div class="mu" style="margin-top:6px">بعد البدء لا يمكن تعديل تصميم النجم. يبدأ بذرة صغيرة ويُضاف إليه باقي الشكل مع تقدمك.</div>`}
+ if(ed){h+=preUI()+`<h2>الشكل</h2><div class="row" style="flex-wrap:wrap">${Object.keys(SHN).map(k=>`<button class="chip ${T.shape==k?'on':''}" onclick="setP('shape','${k}');render()">${SHN[k]}</button>`).join('')}</div>`+shapeX(T)+lockUI()+`<h2>الطبقات</h2><div class="row" style="flex-wrap:wrap">${[['core','النواة'],['aura','الهالة'],['corona','التوهجات'],['parts','الجسيمات'],['rings','المدارات'],['moons','الأقمار']].map(l=>`<button class="chip ${(T.vis||{})[l[0]]===0?'':'on'}" onclick="tg('${l[0]}')">${l[1]}</button>`).join('')}</div><h2>الألوان</h2><div class="row">${['c1','c2','c3'].map((k,i)=>`<div style="text-align:center"><input type="color" value="${T[k]}" oninput="setP('${k}',this.value)"><div class="mu">${['النواة','الهالة','الجسيمات'][i]}</div></div>`).join('')}</div>${texPickerHTML()}<h2>التركيب</h2><div class="sl"><div class="row sp"><span>حجم النواة</span><span class="mu" id="o_size">${Math.round(T.size*100)}</span></div><input type="range" min="50" max="150" value="${Math.round(T.size*100)}" oninput="setP('size',+this.value);$('#o_size').textContent=this.value"></div>${sl('glow','قوة التوهج')}${sl('aura','الهالة')}${sl('parts','كثافة الجسيمات')}${sl('trail','أثر الحركة')}${sl('speed','سرعة الدوران')}${sl('pulse','شدة النبض')}${sl('corona','التوهجات الشمسية')}${sl('rings','عدد المدارات',4)}${sl('moons','عدد الأقمار',5)}<button class="btn" style="width:100%;margin-top:18px" onclick="askStart()">${ST.conf?'تأكيد: ابدأ الآن وأقفل التصميم':'ابدأ رحلة التطور 🚀'}</button><div class="mu" style="margin-top:6px">بعد البدء لا يمكن تعديل تصميم النجم. يبدأ بذرة صغيرة ويُضاف إليه باقي الشكل مع تقدمك.</div>`}
  else h+=`<h2>متى ظهرت كل ميزة</h2>`+Object.keys(DL).filter(k=>k!='shape').map(k=>`<div class="card"><b>${LKN[k]}</b><div class="mu">${ct(k)}</div></div>`).join('');
  return h}
 function sAfter(){const s=cur();attach($('#sc'),()=>{const k=ST.pv==null?100:ST.pv;return eff(s,{core:k,energy:k,aura:k,orbits:k,particles:k})},{bg:1,int:1,tap:tapSfx,starRef:s})}

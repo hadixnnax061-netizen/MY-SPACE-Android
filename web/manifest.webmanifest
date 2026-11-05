@@ -1,8 +1,8 @@
 {
   "id": "./index.html",
-  "name": "MY SPACE — Gemini Living Cosmos v16.1",
+  "name": "MY SPACE — Gemini Living Cosmos v16.2",
   "short_name": "MY SPACE AI",
-  "description": "حوار حقيقي مع النجم والكوكب عبر Google Gemini.",
+  "description": "حوار مع النجم والكوكب عبر Gemini، وTexter للكتابة والقراءة الصوتية.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",

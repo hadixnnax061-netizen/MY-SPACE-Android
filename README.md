@@ -1,8 +1,8 @@
 # MY SPACE — تطبيق Android
 
-تحويل كامل لحزمة **MY SPACE v16.1 — Gemini Living Cosmos** من تطبيق ويب PWA يعتمد على خادم Python محلي إلى تطبيق Android أصلي بحزمة APK قابلة للتثبيت.
+تحويل كامل لحزمة **MY SPACE v16.2 — Gemini Living Cosmos** من تطبيق ويب PWA يعتمد على خادم Python محلي إلى تطبيق Android أصلي بحزمة APK قابلة للتثبيت.
 
-> **تنزيل APK:** [أحدث إصدار](https://github.com/hadixnnax061-netizen/MY-SPACE-Android/releases/latest/download/MY-SPACE-v16.1.apk)
+> **تنزيل APK:** [أحدث إصدار](https://github.com/hadixnnax061-netizen/MY-SPACE-Android/releases/latest/download/MY-SPACE-v16.2.apk)
 > **المستودع:** https://github.com/hadixnnax061-netizen/MY-SPACE-Android
 
 ---
@@ -16,6 +16,8 @@ MY SPACE تطبيق عربي (RTL) لتتبّع العادات والأهداف 
 - **المصغّرات:** ودجات قابلة للتخصيص على الشاشة الرئيسية.
 - **الاستوديو:** تصميم النجم والشكل النهائي والطبقات والألوان والمواد، ورفع صورة خاصة.
 - **الحوار:** محادثة حقيقية مع Gemini بصفتين مستقلتين: النجم والكوكب، ولكل شخصية سياقها وسجلها.
+- **Texter:** مساحة نص واسعة للكتابة واللصق، مع عدّاد أحرف وقراءة صوتية عربية وحفظ الملاحظات.
+- **خامات جاهزة:** ست خامات سطحية تُولّد داخل التطبيق لتغيير مظهر النجم أو الكوكب بضغطة.
 - **الصوت:** تحويل رد Gemini إلى كلام عربي عبر Gemini TTS، مع الرجوع لصوت النظام عند التعذّر.
 - **الإعدادات:** المظهر والتنقّل والنسخ الاحتياطي والاستيراد.
 
@@ -98,6 +100,7 @@ MY SPACE تطبيق عربي (RTL) لتتبّع العادات والأهداف 
 | الجسر | `@JavascriptInterface` غير متزامن + `ExecutorService` + `evaluateJavascript` |
 | المفتاح | AES/GCM/NoPadding بمفتاح 256-bit غير قابل للتصدير في Android Keystore |
 | الصوت | `Gemini TTS` عبر `interactions`، ثم نموذج TTS القياسي، ثم صوت المتصفح |
+| Texter | محرر نص + قراءة Gemini TTS + ملاحظات محفوظة داخل بيانات التطبيق |
 | الملفات | `ACTION_GET_CONTENT` للاستيراد و`ACTION_CREATE_DOCUMENT` للتصدير |
 | الحافظة | `ClipboardManager` |
 | الروابط الخارجية | تُفتح في المتصفح، وليست داخل WebView |
@@ -109,7 +112,7 @@ MY SPACE تطبيق عربي (RTL) لتتبّع العادات والأهداف 
 
 ## التثبيت
 
-1. نزّل `MY-SPACE-v16.1.apk` من [أحدث إصدار](https://github.com/hadixnnax061-netizen/MY-SPACE-Android/releases/latest).
+1. نزّل `MY-SPACE-v16.2.apk` من [أحدث إصدار](https://github.com/hadixnnax061-netizen/MY-SPACE-Android/releases/latest).
 2. على الهاتف اسمح بتثبيت التطبيقات من هذا المصدر (المتصفح أو مدير الملفات).
 3. ثبّت التطبيق وافتحه.
 4. من **الإعدادات → الحديث الذكي · Google Gemini** الصق مفتاح Gemini من
@@ -118,7 +121,7 @@ MY SPACE تطبيق عربي (RTL) لتتبّع العادات والأهداف 
 
 - الحد الأدنى: **Android 7.0 (API 24)**.
 - الحزمة: `com.myspace.app`.
-- الصلاحية الوحيدة المطلوبة: `INTERNET` (و`ACCESS_NETWORK_STATE` للفحص).
+- الصلاحيات المطلوبة: `INTERNET` و`ACCESS_NETWORK_STATE` للفحص، و`VIBRATE` للاستجابة اللمسية.
 
 > **ملاحظة أمنية:** لا تضع المفتاح في محادثة أو Issue أو ملف في المستودع. المفتاح يُدخل من داخل التطبيق ويُخزَّن مشفّراً على الجهاز فقط.
 
@@ -227,4 +230,4 @@ cp android/keystore.properties.example android/keystore.properties
 ## المصدر
 
 - التطبيق الأصلي: `MY_SPACE_v16_1_Gemini_Key_Paste_PWA.zip` (v16.1).
-- إصدار Android: 16.1.0 (`versionCode 16010`).
+- إصدار Android: 16.2.0 (`versionCode 16020`).

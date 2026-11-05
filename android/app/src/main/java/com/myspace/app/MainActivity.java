@@ -103,6 +103,19 @@ public final class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 Log.i(TAG, "MYSPACE_PAGE_FINISHED " + url);
+                view.postDelayed(() -> view.evaluateJavascript(
+                        "(function(){try{"
+                        + "var a=document.getElementById('app'),v=document.getElementById('v'),n=document.getElementById('nav');"
+                        + "var vr=v?v.getBoundingClientRect():null,nr=n?n.getBoundingClientRect():null;"
+                        + "return JSON.stringify({iw:innerWidth,ih:innerHeight,"
+                        + "sw:document.documentElement.scrollWidth,sh:document.documentElement.scrollHeight,"
+                        + "app:a?{disp:getComputedStyle(a).display,op:getComputedStyle(a).opacity,"
+                        + "z:getComputedStyle(a).zIndex,r:a.getBoundingClientRect()}:null,"
+                        + "v:v?{kids:v.children.length,txt:(v.innerText||'').slice(0,60),"
+                        + "scroll:v.scrollTop,r:vr}:null,"
+                        + "n:n?{kids:n.children.length,r:nr}:null});"
+                        + "}catch(e){return 'ERR '+e}})()",
+                        value -> Log.i(TAG, "MYSPACE_DIAG " + value)), 4000);
             }
 
             @Override

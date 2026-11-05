@@ -26,7 +26,7 @@ jobs:
         run: |
           gh release download latest \
             -R hadixnnax061-netizen/MY-SPACE-Android \
-            -p 'MY-SPACE-v16.1.apk' -O app.apk --clobber
+            -p 'MY-SPACE-v16.2.apk' -O app.apk --clobber
           ls -lh app.apk
 
       - name: Enable KVM
@@ -58,6 +58,8 @@ jobs:
             echo "--- crash log ---"
             adb logcat -d -v threadtime > logcat.txt || true
             grep -E "FATAL EXCEPTION|AndroidRuntime|com.myspace|MySpace|MYSPACE" logcat.txt | tail -160 || true
+            adb shell input tap 540 700 || true
+            sleep 3
             adb exec-out screencap -p > screenshot.png || true
             test -s screenshot.png || true
             grep -q "FATAL EXCEPTION" logcat.txt && exit 1 || true

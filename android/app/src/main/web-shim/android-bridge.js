@@ -213,6 +213,18 @@
   setTimeout(function () { forceInitialRender(1); }, 2000);
   setTimeout(function () { forceInitialRender(2); }, 5000);
 
+  /* A tap focuses the interactive canvas and Android draws its native focus
+     highlight (a gold frame) around the whole hero. Drop focus after touch so
+     the cosmos stays clean; keyboard focus remains available. */
+  document.addEventListener('pointerup', function (event) {
+    var target = event.target;
+    if (target && target.classList && target.classList.contains('interactive-3d')) {
+      setTimeout(function () {
+        try { target.blur(); } catch (e) {}
+      }, 80);
+    }
+  }, true);
+
   /* Let the native back button return to the home view before leaving. */
   window.__myspaceAndroidBack = function () {
     try {

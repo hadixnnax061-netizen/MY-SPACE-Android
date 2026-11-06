@@ -81,6 +81,10 @@
     });
   }
 
+  window.__myspaceSetDailyReminder = function (payload) {
+    return call('setDailyReminder', JSON.stringify(payload || {})).then(toResponse);
+  };
+
   var nativeFetch = window.fetch ? window.fetch.bind(window) : null;
 
   window.fetch = function (input, init) {

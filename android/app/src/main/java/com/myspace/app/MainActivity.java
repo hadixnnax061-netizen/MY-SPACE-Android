@@ -11,6 +11,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -51,6 +52,8 @@ public final class MainActivity extends Activity {
     private static final String HOST = "appassets.androidplatform.net";
     private static final String START_URL = "https://" + HOST + "/assets/www/index.html";
     static final String EXTRA_WIDGET_STAR_ID = "com.myspace.app.WIDGET_STAR_ID";
+    static final String EXTRA_OPEN_CHAT = "com.myspace.app.OPEN_CHAT";
+    private static final int REQUEST_NOTIFICATIONS_PERMISSION = 1003;
     private static final int REQUEST_FILE = 1001;
     private static final int REQUEST_SAVE = 1002;
     private static final int MAX_SAVE_BYTES = 8 * 1024 * 1024;
@@ -62,11 +65,18 @@ public final class MainActivity extends Activity {
     private ValueCallback<Uri[]> pendingFileCallback;
     private PendingSave pendingSave;
     private String pendingWidgetStarId;
+    private boolean pendingOpenChat;
+    private String pendingReminderCallbackId;
+    private int pendingReminderHour;
+    private int pendingReminderMinute;
+    private String pendingReminderStarName;
+    private String pendingReminderMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         pendingWidgetStarId = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_WIDGET_STAR_ID);
+        pendingOpenChat = getIntent() != null && getIntent().getBooleanExtra(EXTRA_OPEN_CHAT, false);
 
         root = new FrameLayout(this);
         root.setBackgroundColor(getResources().getColor(R.color.space_bg));
@@ -111,6 +121,7 @@ public final class MainActivity extends Activity {
                 Log.i(TAG, "MYSPACE_PAGE_FINISHED " + url);
                 sendNavInset();
                 focusWidgetBodyInPage();
+                openPendingChatInPage();
                 view.postDelayed(() -> view.evaluateJavascript(
                         "(function(){try{"
                         + "var a=document.getElementById('app'),v=document.getElementById('v'),n=document.getElementById('nav');"
@@ -212,7 +223,7 @@ public final class MainActivity extends Activity {
         settings.setTextZoom(100);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        settings.setUserAgentString(settings.getUserAgentString() + " MYSPACE-Android/16.1");
+        settings.setUserAgentString(settings.getUserAgentString() + " MYSPACE-Android/3.0");
 
         webView.setBackgroundColor(getResources().getColor(R.color.space_bg));
         if (Build.VERSION.SDK_INT >= 26) {
@@ -432,7 +443,16 @@ public final class MainActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent);
         pendingWidgetStarId = intent == null ? null : intent.getStringExtra(EXTRA_WIDGET_STAR_ID);
+        pendingOpenChat = intent != null && intent.getBooleanExtra(EXTRA_OPEN_CHAT, false);
         focusWidgetBodyInPage();
+        openPendingChatInPage();
+    }
+
+    private void openPendingChatInPage() {
+        if (!pendingOpenChat || webView == null) return;
+        pendingOpenChat = false;
+        webView.postDelayed(() -> webView.evaluateJavascript(
+                "(function(){try{if(typeof setV==='function')setV('chat')}catch(e){}})()", null), 500);
     }
 
     private void focusWidgetBodyInPage() {
@@ -442,6 +462,80 @@ public final class MainActivity extends Activity {
         String script = "window.__myspaceOpenStar&&window.__myspaceOpenStar("
                 + org.json.JSONObject.quote(id) + ")";
         webView.postDelayed(() -> webView.evaluateJavascript(script, null), 450);
+    }
+
+    public void configureDailyReminder(String callbackId, boolean enabled,
+                                       int hour, int minute, String starName, String mode) {
+        if (callbackId == null || callbackId.isEmpty() || callbackId.length() > 80) return;
+        if (!enabled) {
+            DailyReminderScheduler.disable(this);
+            if (bridge != null) bridge.completeDailyReminder(callbackId, 200,
+                    "تم إيقاف التذكير اليومي.");
+            return;
+        }
+        if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+            if (bridge != null) bridge.completeDailyReminder(callbackId, 400,
+                    "اختر وقتًا صالحًا للتذكير.");
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            pendingReminderCallbackId = callbackId;
+            pendingReminderHour = hour;
+            pendingReminderMinute = minute;
+            pendingReminderStarName = starName;
+            pendingReminderMode = mode;
+            requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                    REQUEST_NOTIFICATIONS_PERMISSION);
+            return;
+        }
+        finishDailyReminder(callbackId, hour, minute, starName, mode);
+    }
+
+    private void finishDailyReminder(String callbackId, int hour, int minute, String starName, String mode) {
+        if (!DailyReminderScheduler.canPost(this)) {
+            if (bridge != null) bridge.completeDailyReminder(callbackId, 403,
+                    "إشعارات MY SPACE محظورة في إعدادات Android. اسمح بها ثم حاول مجددًا.");
+            return;
+        }
+        DailyReminderScheduler.enable(this, hour, minute, starName, mode);
+        if (bridge != null) bridge.completeDailyReminder(callbackId, 200,
+                "تم حفظ التذكير محليًا. قد يتأخر قليلًا بسبب Android وتوفير الطاقة.");
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != REQUEST_NOTIFICATIONS_PERMISSION) return;
+        String id = pendingReminderCallbackId;
+        pendingReminderCallbackId = null;
+        if (id == null) return;
+        boolean granted = grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        if (granted) {
+            finishDailyReminder(id, pendingReminderHour, pendingReminderMinute,
+                    pendingReminderStarName, pendingReminderMode);
+        } else if (bridge != null) {
+            bridge.completeDailyReminder(id, 403,
+                    "لم يُمنح إذن الإشعارات. لم يتم تفعيل التذكير؛ يمكنك تغيير الإذن من إعدادات Android.");
+        }
+        pendingReminderStarName = null;
+        pendingReminderMode = null;
+    }
+
+    public void shareText(String text) {
+        if (text == null || text.trim().isEmpty()) return;
+        String safe = text.length() > 6000 ? text.substring(0, 6000) : text;
+        Intent send = new Intent(Intent.ACTION_SEND)
+                .setType("text/plain")
+                .putExtra(Intent.EXTRA_TEXT, safe);
+        try {
+            startActivity(Intent.createChooser(send, "مشاركة بطاقة MY SPACE"));
+        } catch (ActivityNotFoundException e) {
+            toast("لا يوجد تطبيق متاح للمشاركة.");
+        }
     }
 
     public void openExternalUrl(String url) {

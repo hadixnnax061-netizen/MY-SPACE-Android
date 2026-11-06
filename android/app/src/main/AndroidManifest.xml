@@ -4,6 +4,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="false"
@@ -49,6 +51,22 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/planet_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".DailyReminderReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".ReminderRescheduleReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
         </receiver>
     </application>
 </manifest>

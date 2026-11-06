@@ -171,6 +171,12 @@ public final class GeminiBridge {
     }
 
     @JavascriptInterface
+    public void shareText(String text) {
+        if (text == null || text.length() > 6000) return;
+        activity.runOnUiThread(() -> activity.shareText(text));
+    }
+
+    @JavascriptInterface
     public void openUrl(String url) {
         activity.runOnUiThread(() -> activity.openExternalUrl(url));
     }
@@ -178,6 +184,46 @@ public final class GeminiBridge {
     @JavascriptInterface
     public void pinPlanetWidget() {
         activity.runOnUiThread(() -> activity.requestPlanetWidget());
+    }
+
+    @JavascriptInterface
+    public void setDailyReminder(String id, String payload) {
+        if (id == null || id.isEmpty() || id.length() > 80) return;
+        try {
+            JSONObject input = parseObject(payload);
+            boolean enabled = input.optBoolean("enabled", false);
+            int hour = input.optInt("hour", -1);
+            int minute = input.optInt("minute", -1);
+            if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                deliver(id, Envelope.error(400, "اختر وقتًا صالحًا للتذكير."));
+                return;
+            }
+            String name = input.optString("starName", "نجمك")
+                    .replaceAll("[\\p{Cntrl}<>\\\"'`]+", "").trim();
+            if (name.length() > 40) name = name.substring(0, 40);
+            final String cleanName = name;
+            String mode = input.optString("mode", "gentle");
+            if (!"quran".equals(mode) && !"space".equals(mode)) mode = "gentle";
+            final String cleanMode = mode;
+            activity.runOnUiThread(() -> activity.configureDailyReminder(
+                    id, enabled, hour, minute, cleanName, cleanMode));
+        } catch (Exception e) {
+            deliver(id, Envelope.error(400, "تعذّر قراءة إعداد التذكير."));
+        }
+    }
+
+    void completeDailyReminder(String id, int status, String message) {
+        if (id == null || id.isEmpty() || id.length() > 80) return;
+        if (status >= 200 && status < 300) {
+            JSONObject body = new JSONObject();
+            try {
+                body.put("ok", true);
+                body.put("message", message);
+            } catch (JSONException ignored) {}
+            deliver(id, Envelope.ok(body));
+        } else {
+            deliver(id, Envelope.error(status, message));
+        }
     }
 
     @JavascriptInterface
@@ -369,7 +415,8 @@ public final class GeminiBridge {
                 + "أجب بالعربية الواضحة القريبة من المستخدم ما لم يطلب لغة أخرى. كن محادثياً وطبيعياً، وأجب عن مضمون السؤال فعلاً، ولا تجعل كل رد شعراً. "
                 + "استخدم سياق التطبيق أدناه باعتباره بيانات موثوقة عن النجم فقط. لا تخترع إنجازات أو ذكريات أو معلومات عن المستخدم. إذا لم تجد معلومة فقل إنك لا تعرفها. "
                 + "لا تزعم أنك عدّلت المهام أو التصميم بنفسك؛ يمكنك اقتراح التغيير وشرح طريقة تنفيذه. لا تطلب كلمة مرور أو مفتاح API. "
-                + "اجعل الرد مناسباً للمحادثة، غالباً من فقرة إلى ثلاث فقرات، واسأل سؤال متابعة واحداً عندما يكون مفيداً.\n\n"
+                + "اجعل الرد مناسباً للمحادثة، غالباً من فقرة إلى ثلاث فقرات، واسأل سؤال متابعة واحداً عندما يكون مفيداً. "
+                + "في المسائل الدينية لا تختلق آيات أو أحاديث ولا تنسب قولاً لمصدر بلا تحقق؛ ميّز الحكمة المنسوبة من الحديث، ولا تقدّم فتوى أو تفسيراً جازماً. إذا لم تملك مصدرًا موثوقًا فقل إنك لا تستطيع التحقق. في العلوم ميّز الحقيقة عن الاستعارة، واذكر المصدر أو حدود اليقين عند الحاجة.\n\n"
                 + "سياق MY SPACE الحالي (JSON):\n" + context;
     }
 

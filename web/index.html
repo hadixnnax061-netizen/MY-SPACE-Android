@@ -444,10 +444,52 @@ nav{background:rgba(3,9,14,.74)!important;backdrop-filter:blur(16px);-webkit-bac
 .gemini-led{width:9px;height:9px;border-radius:50%;background:#d3a64a;box-shadow:0 0 10px currentColor;flex:none}
 .gemini-led.online{background:#45d69b}.gemini-led.offline{background:#d3a64a}.gemini-status-text{font-size:11px;color:var(--mu);line-height:1.6}
 .gemini-talkers{display:flex;gap:8px;margin:10px 0 12px}.gemini-talkers .chip{flex:1;min-height:40px}
-.gemini-chat-note{font-size:10px;color:var(--mu);text-align:center;margin:0 0 8px}
-.gemini-thinking{align-self:flex-start;display:flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid #36e7dc2b;border-radius:14px;background:#0b1a20;color:#9bc5c9;font-size:11px}
-.gemini-thinking i{width:5px;height:5px;border-radius:50%;background:#36e7dc;animation:geminiDot 1s infinite ease-in-out}
-.gemini-thinking i:nth-child(2){animation-delay:.16s}.gemini-thinking i:nth-child(3){animation-delay:.32s}
+.gemini-chat-note{font-size:10px;color:var(--mu);text-align:center;margin:0 0 8px;line-height:1.7}
+.gemini-chat-tools{display:grid;gap:9px;margin:10px 0}
+.chat-wallpaper-row{display:flex;align-items:center;gap:8px;overflow:auto;padding:2px 0 5px;scrollbar-width:none}
+.chat-wallpaper-row::-webkit-scrollbar{display:none}
+.chat-wallpaper-choice{display:flex;align-items:center;gap:7px;flex:none;min-height:38px;padding:5px 10px;border:1px solid var(--ln);border-radius:22px;background:#081116d9;color:var(--mu);font:inherit;font-size:10px;cursor:pointer}
+.chat-wallpaper-choice[aria-pressed="true"]{border-color:var(--cy);color:var(--tx);box-shadow:0 0 18px color-mix(in srgb,var(--cy) 18%,transparent)}
+.chat-wallpaper-swatch{width:24px;height:24px;border-radius:50%;background-size:cover;background-position:center;border:1px solid #ffffff45;box-shadow:0 0 10px #36e7dc22}
+.chat-thread{position:relative;isolation:isolate;overflow:auto;display:flex;flex-direction:column;gap:12px;min-height:250px;max-height:min(52vh,560px);padding:14px 11px;border:1px solid #8be8e51a;border-radius:20px;background:#050b10;overscroll-behavior:contain}
+.chat-thread:before{content:"";position:absolute;z-index:-1;inset:-5%;pointer-events:none;background-image:linear-gradient(180deg,#050b10b8 0%,#050b109c 42%,#050b10d9 100%),var(--chat-wallpaper);background-size:cover;background-position:center;opacity:.95;transform:scale(1.03);animation:chatNebulaDrift 72s ease-in-out infinite alternate}
+@keyframes chatNebulaDrift{from{transform:scale(1.03) translate3d(-.6%,.3%,0)}to{transform:scale(1.08) translate3d(.6%,-.3%,0)}}
+.gemini-thinking{align-self:flex-start;display:flex;align-items:center;gap:8px;padding:11px 14px;border:1px solid #36e7dc35;border-radius:16px 16px 16px 5px;background:#09151de8;color:#b8d9de;font-size:11px;box-shadow:0 8px 28px #0006}
+.gemini-thinking i{width:6px;height:6px;border-radius:50%;background:radial-gradient(circle,#f4ffff 0 16%,#69f5eb 35%,#2acacb 68%,transparent 100%);box-shadow:0 0 10px #5df8e7;animation:geminiDust 1.65s infinite ease-in-out}
+.gemini-thinking i:nth-child(2){animation-delay:.18s}.gemini-thinking i:nth-child(3){animation-delay:.36s}
+@keyframes geminiDust{0%,100%{opacity:.3;transform:translate3d(0,1px,0) scale(.72)}40%{opacity:1;transform:translate3d(0,-4px,0) scale(1.2)}70%{opacity:.7;transform:translate3d(2px,1px,0) scale(.9)}}
+.knowledge-pills{display:flex;gap:7px;overflow-x:auto;padding:8px 0;scrollbar-width:none}.knowledge-pills::-webkit-scrollbar{display:none}
+.knowledge-pills .chip{white-space:nowrap;flex:none;min-height:39px}
+.knowledge-card{position:relative;margin:3px 0 2px;padding:14px 14px 12px;border:1px solid color-mix(in srgb,var(--knowledge-accent) 48%,transparent);border-radius:17px;background:linear-gradient(145deg,#122630eF,#091219f2 72%);box-shadow:inset 0 1px #ffffff18,0 12px 30px #0006;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);overflow:hidden}
+.knowledge-card:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,#69eee0,#bca4ff,transparent);opacity:.8}
+.knowledge-card-kicker{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#8ddfd9;font-size:9px;letter-spacing:.08em;margin-bottom:8px}
+.knowledge-card h3{margin:0 0 9px;color:#eafafa;font-size:13px;line-height:1.6}
+.knowledge-card-quote{font-family:'Amiri','Readex Pro',serif;color:#d9fff9;font-size:19px;line-height:1.95;text-align:center;text-shadow:0 0 18px #4de4d727;margin:8px 0}
+.knowledge-card-fact{color:#f1f7ff;font-size:13px;line-height:1.9;margin:7px 0}
+.knowledge-card-source{color:#8cabb8;font-size:10px;line-height:1.65;border-top:1px solid #ffffff16;padding-top:8px;margin-top:9px}
+.knowledge-card-note{font-size:10px;line-height:1.8;color:#b3c5cf;margin-top:8px}
+.knowledge-card-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.knowledge-card-actions button{min-height:35px;padding:7px 10px;font:inherit;font-size:10px;border:1px solid #72d9d544;border-radius:11px;background:#061117aa;color:#e6fbfa;cursor:pointer}
+.knowledge-card-actions button:focus-visible,.chat-wallpaper-choice:focus-visible{outline:2px solid #86fff0;outline-offset:2px}
+.knowledge-shelf,.daily-reminder-card{padding:12px;border:1px solid var(--ln);border-radius:16px;background:linear-gradient(145deg,#0c1b23eF,#081116ed);margin:8px 0}
+.knowledge-shelf-items{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.knowledge-shelf-items .chip{font-size:10px;max-width:100%;min-height:36px}
+.daily-reminder-card{display:grid;gap:8px}
+.daily-reminder-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.daily-reminder-card p{margin:0;color:var(--mu);font-size:10px;line-height:1.7}
+.daily-reminder-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.daily-reminder-row input[type="time"],.daily-reminder-row select{min-height:40px;min-width:120px;padding:6px 10px;color:var(--tx);background:#071219;border:1px solid var(--ln);border-radius:11px;font:inherit}.daily-reminder-row select{flex:1;min-width:150px}
+.daily-reminder-status{min-height:16px;color:var(--mu);font-size:10px;line-height:1.6}
+.chat-error{padding:11px 13px;border:1px solid #e59d8255;border-radius:14px;background:#291a18dd;color:#ffe0d5;font-size:11px;line-height:1.8}
+.chat-error button{margin-top:8px;min-height:36px;padding:6px 11px;border:1px solid #ffc2a355;border-radius:10px;background:#432a22;color:#ffe8df;font:inherit;cursor:pointer}
+.chat-ai-actions{display:flex;justify-content:flex-end;min-height:29px;margin-top:3px}
+.chat-ai-actions button{padding:4px 8px;border:1px solid #60ded52e;border-radius:10px;background:#071118b8;color:#b9efea;font:inherit;font-size:10px;cursor:pointer}
+.chat-ai-actions button:disabled{opacity:.65}
+@media(prefers-reduced-motion:reduce){.chat-thread:before,.gemini-thinking i{animation:none!important}}
+@media(max-width:380px){.knowledge-card{padding:11px}.knowledge-card-quote{font-size:17px}.chat-thread{padding:11px 8px}}
+.gemini-thinking{align-self:flex-start;display:flex;align-items:center;gap:8px;padding:11px 14px;border:1px solid #36e7dc35;border-radius:16px 16px 16px 5px;background:#09151de8;color:#b8d9de;font-size:11px;box-shadow:0 8px 28px #0006}
+.gemini-thinking i{width:6px;height:6px;border-radius:50%;background:radial-gradient(circle,#f4ffff 0 16%,#69f5eb 35%,#2acacb 68%,transparent 100%);box-shadow:0 0 10px #5df8e7;animation:geminiDust 1.65s infinite ease-in-out}
+.gemini-thinking i:nth-child(2){animation-delay:.18s}.gemini-thinking i:nth-child(3){animation-delay:.36s}
 @keyframes geminiDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
 .gemini-message-label{font-size:9px;color:#72c9c5;margin:0 8px 4px}
 .gemini-audio-btn{border:0;background:transparent;color:var(--cy);font:inherit;font-size:10px;cursor:pointer;padding:3px 7px}
@@ -2220,14 +2262,14 @@ async function refreshGeminiStatus(force=false){
  const outIds=['gemini-settings-status','gemini-chat-status'];
  if(!force&&Date.now()-GEMINI_STATUS_CACHE.checkedAt<20000){updateGeminiStatusUI();return GEMINI_STATUS_CACHE}
  try{const r=await fetch('/api/status',{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error||'تعذّر فحص الخادم');GEMINI_STATUS_CACHE={checkedAt:Date.now(),configured:!!d.configured,model:d.model||'gemini-3.8-flash',error:''}}
- catch(e){GEMINI_STATUS_CACHE={checkedAt:Date.now(),configured:false,model:'gemini-3.8-flash',error:'خادم Gemini غير متصل. شغّل حزمة MY SPACE Gemini عبر run-linux.sh.'}}
+ catch(e){GEMINI_STATUS_CACHE={checkedAt:Date.now(),configured:false,model:'gemini-3.8-flash',error:window.__MYSPACE_ANDROID__?'تعذّر فحص اتصال Google Gemini. تحقق من الإنترنت ومفتاح API.':'خادم Gemini غير متصل. شغّل حزمة MY SPACE Gemini عبر run-linux.sh.'}}
  updateGeminiStatusUI();return GEMINI_STATUS_CACHE;
 }
 async function saveGeminiApiKey(){
  const input=document.getElementById('gemini-api-key-input'),feedback=document.getElementById('gemini-key-feedback'),btn=document.getElementById('gemini-key-save');
  const key=String(input?.value||'').trim();
  if(!key){if(feedback){feedback.className='gemini-key-feedback bad';feedback.textContent='ألصق مفتاح Google Gemini أولاً.'}return}
- if(feedback){feedback.className='gemini-key-feedback';feedback.textContent='جارٍ حفظ المفتاح على هذا الكمبيوتر…'}
+ if(feedback){feedback.className='gemini-key-feedback';feedback.textContent=window.__MYSPACE_ANDROID__?'جارٍ حفظ المفتاح مشفّراً على هذا الجهاز…':'جارٍ حفظ المفتاح على هذا الكمبيوتر…'}
  if(btn){btn.disabled=true;btn.textContent='جارٍ الحفظ…'}
  try{
   const r=await fetch('/api/config/key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({apiKey:key}),cache:'no-store'});
@@ -2244,7 +2286,7 @@ async function saveGeminiApiKey(){
 }
 function toggleGeminiKeyVisibility(){const i=document.getElementById('gemini-api-key-input');if(!i)return;i.type=i.type==='password'?'text':'password'}
 function updateGeminiStatusUI(){
- const d=GEMINI_STATUS_CACHE,txt=d.configured?`متصل بالخادم · ${d.model} · جاهز للمحادثة`:(d.error||'الخادم يعمل، لكن مفتاح Google API غير مضبوط.');
+ const d=GEMINI_STATUS_CACHE,place=window.__MYSPACE_ANDROID__?'Google Gemini':'خادم Gemini',txt=d.configured?`متصل بـ${place} · ${d.model} · جاهز للمحادثة`:(d.error||'الخدمة غير متصلة أو لم يُضبط مفتاح Google API.');
  for(const id of ['gemini-settings-status','gemini-chat-status']){const e=document.getElementById(id);if(e)e.textContent=txt}
  for(const id of ['gemini-settings-led','gemini-chat-led']){const e=document.getElementById(id);if(e)e.classList.toggle('online',!!d.configured)}
 }
@@ -2254,42 +2296,138 @@ async function testGeminiConnection(){
  catch(e){GEMINI_STATUS_CACHE={checkedAt:Date.now(),configured:false,model:'gemini-3.8-flash',error:String(e.message||e)};updateGeminiStatusUI();if(status)status.textContent=GEMINI_STATUS_CACHE.error;toast('تعذّر الاتصال: '+GEMINI_STATUS_CACHE.error.slice(0,90))}
 }
 async function requestGeminiReply(s,kind){
- const messages=(ST.chat||[]).filter(m=>m&&(m.w==='me'||m.w==='st')&&typeof m.t==='string').slice(-18).map(m=>({role:m.w==='me'?'user':'model',text:m.t.slice(0,1800)}));
+ const messages=(ST.chat||[]).filter(m=>m&&!m.system&&!m.knowledgeId&&!m.cosmic&&(m.w==='me'||m.w==='st')&&typeof m.t==='string').slice(-18).map(m=>({role:m.w==='me'?'user':'model',text:m.t.slice(0,1800)}));
  const payload={character:kind,context:geminiContextFor(s,kind),messages};
  const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),cache:'no-store'});
  let data={};try{data=await response.json()}catch(_){}
  if(!response.ok)throw new Error(data.error||`فشل الاتصال بـ Gemini (${response.status})`);
  const answer=String(data.text||'').trim();if(!answer)throw new Error('وصل رد فارغ من Gemini. أعد المحاولة.');return answer;
 }
-async function speakGemini(text,kind){
- if(!S.voice)return;
- try{
-  const r=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:String(text||'').slice(0,1800),character:kind}),cache:'no-store'});
-  const d=await r.json();if(!r.ok||!d.audioBase64)throw new Error(d.error||'تعذّر توليد الصوت');
-  if(GEMINI_AUDIO_URL)URL.revokeObjectURL(GEMINI_AUDIO_URL);
-  const bytes=Uint8Array.from(atob(d.audioBase64),c=>c.charCodeAt(0));const blob=new Blob([bytes],{type:d.mimeType||'audio/wav'});GEMINI_AUDIO_URL=URL.createObjectURL(blob);
-  const audio=new Audio(GEMINI_AUDIO_URL);await audio.play();
- }catch(e){speakSoul(text,cur());console.warn('Gemini TTS unavailable; browser voice fallback:',e)}
+let activeChatAudio=null,activeChatUtterance=null,activeChatVoiceIndex=-1,activeChatSpeechAbort=null,activeChatSpeechRequest=0;
+function stopChatVoice(){
+ activeChatSpeechRequest++;
+ if(activeChatSpeechAbort){try{activeChatSpeechAbort.abort()}catch(e){}activeChatSpeechAbort=null}
+ if(activeChatAudio){try{activeChatAudio.pause();activeChatAudio.currentTime=0;activeChatAudio.src=''}catch(e){}activeChatAudio=null}
+ if('speechSynthesis'in window){try{speechSynthesis.cancel();soulSpeechToken++}catch(e){}}
+ if(GEMINI_AUDIO_URL){try{URL.revokeObjectURL(GEMINI_AUDIO_URL)}catch(e){}GEMINI_AUDIO_URL=null}
+ activeChatUtterance=null;activeChatVoiceIndex=-1;
+ document.querySelectorAll('[data-chat-voice]').forEach(b=>{b.disabled=false;b.textContent='◖))) استمع';b.setAttribute('aria-label','استمع إلى الرد')});
 }
-function appendAiError(message){const safe=String(message||'تعذّر الاتصال').slice(0,260);ST.chat.push({w:'st',t:`تعذّر وصول الرد من Gemini: ${safe}\n\nتحقق من إعداد الخادم ومفتاح Google API، ثم أعد المحاولة.`,system:true});persistActiveChat()}
+function chatMessageSpeechText(m){
+ if(m&&m.knowledgeId){const c=COSMIC_CARDS[m.knowledgeId];return c?[c.title,c.quote||c.fact,c.citation,c.note].filter(Boolean).join('. '):''}
+ return String(m&&m.t||'').slice(0,1800);
+}
+function localArabicSpeech(text,btn,index){
+ if(!('speechSynthesis'in window)||typeof SpeechSynthesisUtterance==='undefined')throw new Error('الصوت المحلي غير متاح على هذا الجهاز.');
+ const u=new SpeechSynthesisUtterance(String(text||'').replace(/\n+/g,'، '));u.lang='ar';u.rate=.96;u.pitch=1;u.volume=.9;
+ const voices=speechSynthesis.getVoices?speechSynthesis.getVoices():[],ar=voices.find(v=>/^ar([_-]|$)/i.test(v.lang||''));if(ar){u.voice=ar;u.lang=ar.lang}
+ activeChatUtterance=u;activeChatVoiceIndex=index;if(btn){btn.disabled=false;btn.textContent='⏹ إيقاف';btn.setAttribute('aria-label','إيقاف القراءة الصوتية')}
+ u.onend=()=>{if(activeChatUtterance===u)stopChatVoice()};u.onerror=()=>{if(activeChatUtterance===u)stopChatVoice()};speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+async function speakChatMessage(index,btn){
+ if(activeChatVoiceIndex===index){stopChatVoice();return}
+ const m=ST.chat[index];if(!m||m.system||m.cosmic)return;
+ const text=chatMessageSpeechText(m);if(!text)return;
+ stopChatVoice();
+ if(m.knowledgeId){try{localArabicSpeech(text,btn,index)}catch(e){if(btn){btn.disabled=false;btn.textContent='◖))) استمع'}toast(e.message||'الصوت المحلي غير متاح.')}return}
+ if(!ensureGeminiSpeechConsent())return;
+ const request=++activeChatSpeechRequest,controller=typeof AbortController==='function'?new AbortController():null;activeChatSpeechAbort=controller;activeChatVoiceIndex=index;
+ const kind=m.character||geminiKind();
+ if(btn){btn.disabled=false;btn.textContent='⏹ إيقاف';btn.setAttribute('aria-label','إلغاء تجهيز الصوت')}
+ try{
+  const options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text.slice(0,1800),character:kind}),cache:'no-store'};if(controller)options.signal=controller.signal;
+  const r=await fetch('/api/speech',options);const d=await r.json();if(request!==activeChatSpeechRequest)return;if(!r.ok||!d.audioBase64)throw new Error(d.error||'تعذّر توليد الصوت');
+  const bytes=Uint8Array.from(atob(d.audioBase64),c=>c.charCodeAt(0));const blob=new Blob([bytes],{type:d.mimeType||'audio/wav'});GEMINI_AUDIO_URL=URL.createObjectURL(blob);
+  const audio=new Audio(GEMINI_AUDIO_URL);activeChatAudio=audio;activeChatSpeechAbort=null;if(btn)btn.setAttribute('aria-label','إيقاف القراءة الصوتية');
+  audio.onended=()=>{if(activeChatAudio===audio)stopChatVoice()};audio.onerror=()=>{if(activeChatAudio===audio)stopChatVoice()};await audio.play();
+ }catch(e){
+  if(request!==activeChatSpeechRequest||e.name==='AbortError')return;
+  activeChatSpeechAbort=null;
+  if(activeChatAudio){try{activeChatAudio.pause();activeChatAudio.src=''}catch(_){}activeChatAudio=null}
+  if(GEMINI_AUDIO_URL){try{URL.revokeObjectURL(GEMINI_AUDIO_URL)}catch(_){}GEMINI_AUDIO_URL=null}
+  try{localArabicSpeech(text,btn,index);toast('تُستخدم الآن قراءة الجهاز المحلية.')}catch(localError){activeChatVoiceIndex=-1;if(btn){btn.disabled=false;btn.textContent='◖))) استمع';btn.setAttribute('aria-label','استمع إلى الرد')}toast(localError.message||'تعذّرت القراءة الصوتية.')}
+ }
+}
+function appendAiError(message){const safe=String(message||'تعذّر الاتصال').slice(0,260);ST.chat.push({w:'st',t:`تعذّر وصول الرد من Gemini: ${safe}\n\nتحقق من اتصال الإنترنت وإعداد Gemini، ثم أعد المحاولة.`,system:true});persistActiveChat()}
+function retryGeminiLast(){if(ST.geminiBusy)return;while(ST.chat.length&&ST.chat[ST.chat.length-1].system)ST.chat.pop();let i=ST.chat.length-1;while(i>=0&&ST.chat[i].knowledgeId)i--;if(i<0||ST.chat[i].w!=='me'){toast('لا توجد رسالة يمكن إعادة إرسالها.');render();return}const q=String(ST.chat[i].t||'');ST.chat.splice(i,1);persistActiveChat();ask(q)}
 /* ============================================================================ */
 
-function chat(){const s=cur();ensureChatSession();
- const kind=geminiKind(),who=kind==='planet'?'كوكبك':'نجمك';
- return `<div class="page-head"><div><div class="brand-kicker">GEMINI · COSMIC DIALOGUE</div><h1>${soulEsc(s.name)}</h1><div class="mu">حوار حيّ مع ${who}</div></div><div class="chat-controls"><select id="ps" onchange="S.pers=this.value;save()"><option value="calm">هادئ</option><option value="explore">استكشافي</option><option value="sci">علمي</option></select></div></div>
+const CHAT_WALLPAPERS={teal:{label:'سديم فيروزي',url:'./assets/chat/nebula-teal.jpg'},violet:{label:'سديم بنفسجي',url:'./assets/chat/nebula-violet.jpg'},amber:{label:'سديم ذهبي',url:'./assets/chat/nebula-amber.jpg'}};
+const COSMIC_CARDS={
+ quran_effort:{kind:'قرآن كريم',title:'آية عن السعي',quote:'وَأَنْ لَيْسَ لِلْإِنْسَانِ إِلَّا مَا سَعَىٰ',citation:'القرآن الكريم · سورة النجم، الآية 39',note:'تأمل أدبي اختياري، وليس تفسيرًا: اختر خطوة صغيرة يمكنك إتمامها اليوم.',source:'Quran.com — النص ورقم الآية',url:'https://quran.com/an-najm/39',color:'#67e8df'},
+ quran_creation:{kind:'قرآن كريم',title:'آية من سورة الصافات',quote:'وَاللَّهُ خَلَقَكُمْ وَمَا تَعْمَلُونَ',citation:'القرآن الكريم · سورة الصافات، الآية 96',note:'تُعرض الآية بنصّها ومرجعها؛ لا تُستخدم هنا لإثبات ادعاء علمي.',source:'Quran.com — النص ورقم الآية',url:'https://quran.com/as-saffat/96',color:'#c5a7ff'},
+ ali_wisdom:{kind:'حكمة منسوبة',title:'حكمة في محاسبة النفس',quote:'مَنْ حَاسَبَ نَفْسَه رَبِحَ، وَمَنْ غَفَلَ عَنْهَا خَسِرَ',citation:'حكمة منسوبة إلى الإمام علي عليه السلام، كما توردها مؤسسة علوم نهج البلاغة.',note:'ليست معروضة بوصفها حديثًا صحيحًا؛ مصدر النقل والملاحظة على النسبة موضّحان في صفحة المصدر.',source:'مؤسسة علوم نهج البلاغة — مقالة في أخلاق الإمام علي',url:'https://inahj.org/shortresearchwisdomstring/3275',color:'#ffd18a'},
+ star_birth:{kind:'فضاء · NASA',title:'كيف تولد النجوم؟',fact:'تتكون النجوم داخل سحب جزيئية كبيرة من الغاز والغبار. تتجمع مناطق أكثر كثافة بفعل الجاذبية، ثم تسخن المادة المنهارة ويتشكل النجم الأولي.',citation:'NASA Science · Star Basics',note:'هذه خلاصة مبسطة للمصدر، لا مقارنة حرفية بين النجوم وعادات الإنسان.',source:'NASA Science — Star Basics',url:'https://science.nasa.gov/universe/stars/',color:'#7bc7ff'},
+ neutron_star:{kind:'فيزياء فلكية · NASA',title:'نجم نيوتروني بكثافة هائلة',fact:'قد تضغط بقايا نجمية كتلة تقارب كتلة الشمس داخل جسم يبلغ قطره نحو 20 كيلومترًا؛ وتختلف الكتلة والحجم بين الأجرام.',citation:'NASA Goddard · Neutron Stars',note:'معلومة فلكية، وليست تشبيهًا طبيًا أو وصفًا لطاقة الإنسان.',source:'NASA Goddard — Neutron Stars',url:'https://imagine.gsfc.nasa.gov/science/objects/neutron_stars1.html',color:'#ff9fc7'},
+ stellar_elements:{kind:'كيمياء كونية · NASA',title:'عناصر تتكوّن في النجوم',fact:'تُنتج تفاعلات الاندماج في النجوم عناصر أثقل مثل الكربون والأكسجين. وتُثري المواد المقذوفة من النجوم بعض السحب التي تنشأ منها أجيال لاحقة.',citation:'NASA Science · Star Basics',note:'لا يعني ذلك أن كل العناصر في أجسامنا أصلها النجوم؛ أصول العناصر تختلف.',source:'NASA Science — Star Basics',url:'https://science.nasa.gov/universe/stars/',color:'#a7e8b3'}
+};
+function ensureChatUX(){
+ if(!CHAT_WALLPAPERS[S.chatTheme])S.chatTheme='teal';
+ if(!Array.isArray(S.savedKnowledge))S.savedKnowledge=[];
+ S.savedKnowledge=S.savedKnowledge.filter(id=>Object.prototype.hasOwnProperty.call(COSMIC_CARDS,id)).slice(0,80);
+ if(!S.dailyReminder||typeof S.dailyReminder!=='object')S.dailyReminder={enabled:false,time:'20:00',mode:'gentle'};
+ if(typeof S.dailyReminder.enabled!=='boolean')S.dailyReminder.enabled=false;
+ if(!['gentle','quran','space'].includes(S.dailyReminder.mode))S.dailyReminder.mode='gentle';
+ if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(S.dailyReminder.time||'')))S.dailyReminder.time='20:00';
+ return S.dailyReminder;
+}
+function ensureGeminiConsent(){
+ try{if(localStorage.getItem('MYSPACE_GEMINI_CONSENT_V1')==='yes')return true}catch(e){}
+ const ok=confirm('قبل أول إرسال، سيصل إلى Google Gemini نص رسالتك وسياق مختصر من التطبيق، مثل اسم الجرم والتقدم والمهام والسجل الحديث، إضافة إلى آخر رسائل الحوار. لا ترسل معلومات حساسة. بطاقات المعرفة المحلية لا تُرسل. هل توافق على متابعة المحادثة؟');
+ if(ok){try{localStorage.setItem('MYSPACE_GEMINI_CONSENT_V1','yes')}catch(e){}}return ok;
+}
+function ensureGeminiSpeechConsent(){
+ try{if(localStorage.getItem('MYSPACE_GEMINI_SPEECH_CONSENT_V1')==='yes')return true}catch(e){}
+ const ok=confirm('لتوليد صوت Gemini سيُرسل نص الرد ونوع الشخصية (نجم/كوكب) إلى Google. يمكنك إلغاء الطلب قبل تشغيله أو استخدام القراءة المحلية. هل توافق؟');
+ if(ok){try{localStorage.setItem('MYSPACE_GEMINI_SPEECH_CONSENT_V1','yes')}catch(e){}}return ok;
+}
+function setChatTheme(theme){if(!CHAT_WALLPAPERS[theme])return;S.chatTheme=theme;save();render()}
+function showKnowledgeCard(id){if(!COSMIC_CARDS[id])return;ST.chat.push({w:'st',knowledgeId:id});persistActiveChat();render();const v=$('#v');if(v)v.scrollTop=v.scrollHeight}
+function toggleKnowledgeCard(id){ensureChatUX();if(!COSMIC_CARDS[id])return;const a=S.savedKnowledge,i=a.indexOf(id);if(i>=0)a.splice(i,1);else a.unshift(id);save();render()}
+function toggleKnowledgeLibrary(){ST.showKnowledgeLibrary=!ST.showKnowledgeLibrary;render()}
+function openKnowledgeSource(id){const c=COSMIC_CARDS[id];if(!c)return;if(window.MYSPACE_NATIVE&&MYSPACE_NATIVE.openUrl)MYSPACE_NATIVE.openUrl(c.url);else window.open(c.url,'_blank','noopener')}
+function knowledgeShareText(id){const c=COSMIC_CARDS[id];return c?[c.title,c.quote||c.fact,c.citation,c.note,c.url].filter(Boolean).join('\n'):''}
+async function copyKnowledgeCard(id){const text=knowledgeShareText(id);if(!text)return;try{await navigator.clipboard.writeText(text);toast('تم نسخ البطاقة مع مصدرها.')}catch(e){toast('تعذّر النسخ على هذا الجهاز.')}}
+async function shareKnowledgeCard(id){const text=knowledgeShareText(id);if(!text)return;if(window.MYSPACE_NATIVE&&MYSPACE_NATIVE.shareText){MYSPACE_NATIVE.shareText(text);return}if(navigator.share){try{await navigator.share({title:'بطاقة MY SPACE',text});return}catch(e){if(e&&e.name==='AbortError')return}}copyKnowledgeCard(id)}
+function knowledgeCardMarkup(id,index){
+ const c=COSMIC_CARDS[id];if(!c)return'';const saved=(S.savedKnowledge||[]).includes(id);
+ return `<div class="msg-row st knowledge-message"><div class="msg-avatar"><i></i></div><div class="knowledge-card" style="--knowledge-accent:${c.color}"><div class="knowledge-card-kicker"><span>${soulEsc(c.kind)}</span><span>مصدر موثق</span></div><h3>${soulEsc(c.title)}</h3>${c.quote?`<div class="knowledge-card-quote">${soulEsc(c.quote)}</div>`:`<p class="knowledge-card-fact">${soulEsc(c.fact)}</p>`}<div class="knowledge-card-source">${soulEsc(c.citation)}<br>${soulEsc(c.source)}</div><div class="knowledge-card-note">${soulEsc(c.note)}</div><div class="knowledge-card-actions"><button type="button" onclick="toggleKnowledgeCard('${id}')">${saved?'★ محفوظ':'☆ حفظ'}</button><button type="button" onclick="shareKnowledgeCard('${id}')">مشاركة</button><button type="button" onclick="copyKnowledgeCard('${id}')">نسخ</button><button type="button" onclick="openKnowledgeSource('${id}')">المصدر</button><button type="button" data-chat-voice="${index}" onclick="speakChatMessage(${index},this)">◖))) استمع</button></div></div></div>`;
+}
+function savedKnowledgeShelf(){if(!ST.showKnowledgeLibrary)return'';const ids=S.savedKnowledge||[];return `<div class="knowledge-shelf"><div class="row sp"><b>بطاقاتي المحفوظة</b><button class="chip" onclick="toggleKnowledgeLibrary()">إخفاء</button></div>${ids.length?`<div class="knowledge-shelf-items">${ids.map(id=>`<button class="chip" onclick="showKnowledgeCard('${id}')">${soulEsc(COSMIC_CARDS[id].title)}</button>`).join('')}</div>`:'<p class="mu" style="font-size:10px">لم تحفظ بطاقة بعد. استخدم زر «حفظ» على أي بطاقة.</p>'}</div>`}
+function dailyReminderPanel(){const r=ensureChatUX();return `<section class="daily-reminder-card" aria-labelledby="daily-reminder-title"><div class="daily-reminder-head"><b id="daily-reminder-title">تذكير يومي اختياري</b><span aria-hidden="true">◷</span></div><p>يُخزّن محليًا على جهازك. اختر الوقت والمحتوى؛ قد يؤخر Android التنبيه بسبب توفير الطاقة. لا نستخدم موقعك ولا نحسب وقت الفجر.</p><div class="daily-reminder-row"><label class="mu"><input id="daily-reminder-on" type="checkbox" ${r.enabled?'checked':''}> تذكير واحد يوميًا</label><input id="daily-reminder-time" type="time" value="${soulEsc(r.time)}" aria-label="وقت التذكير"><select id="daily-reminder-mode" aria-label="نوع التذكير"><option value="gentle" ${r.mode==='gentle'?'selected':''}>همسة هادئة</option><option value="quran" ${r.mode==='quran'?'selected':''}>آية قرآنية بلا تفسير</option><option value="space" ${r.mode==='space'?'selected':''}>معلومة فلكية بمصدر</option></select><button class="btn" onclick="saveDailyReminder()">حفظ الإعداد</button></div><div class="daily-reminder-status" id="daily-reminder-status">${r.enabled?'التذكير مفعّل على هذا الجهاز.':'التذكير متوقف حتى تختار تفعيله.'}</div></section>`}
+async function saveDailyReminder(){
+ const status=$('#daily-reminder-status'),on=!!$('#daily-reminder-on')?.checked,time=String($('#daily-reminder-time')?.value||'20:00'),mode=String($('#daily-reminder-mode')?.value||'gentle');
+ if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){if(status)status.textContent='اختر وقتًا صالحًا.';return}
+ if(!window.__MYSPACE_ANDROID__||typeof window.__myspaceSetDailyReminder!=='function'){if(status)status.textContent='التذكيرات المحلية متاحة في نسخة Android فقط.';return}
+ if(status)status.textContent='يجري حفظ الإعداد…';const [hour,minute]=time.split(':').map(Number);
+ try{const response=await window.__myspaceSetDailyReminder({enabled:on,hour,minute,mode,starName:String(cur()?.name||'نجمك').slice(0,60)});const result=await response.json();if(!response.ok)throw new Error(result.error||'تعذّر حفظ التذكير.');S.dailyReminder={enabled:on,time,mode};save();render();toast(on?'تم تفعيل التذكير اليومي.':'تم إيقاف التذكير اليومي.')}catch(e){if(status)status.textContent=e.message||'تعذّر حفظ الإعداد.';toast(e.message||'تعذّر حفظ الإعداد.')}
+}
+function chat(){
+ const s=cur();ensureChatSession();const reminder=ensureChatUX(),kind=geminiKind(),who=kind==='planet'?'كوكبك':'نجمك',theme=CHAT_WALLPAPERS[S.chatTheme],saved=(S.savedKnowledge||[]).length;
+ const wallpaperButtons=Object.entries(CHAT_WALLPAPERS).map(([key,item])=>`<button type="button" class="chat-wallpaper-choice" aria-pressed="${S.chatTheme===key}" onclick="setChatTheme('${key}')"><span class="chat-wallpaper-swatch" style="background-image:url('${item.url}')"></span>${item.label}</button>`).join('');
+ return `<div class="page-head"><div><div class="brand-kicker">GEMINI · COSMIC DIALOGUE</div><h1>${soulEsc(s.name)}</h1><div class="mu">حوار مع شخصية رقمية خيالية · ${who}</div></div><div class="chat-controls"><select id="ps" onchange="S.pers=this.value;save()"><option value="calm">هادئ</option><option value="explore">استكشافي</option><option value="sci">علمي</option></select></div></div>
  <div class="gemini-talkers"><button class="chip ${kind==='star'?'on':''}" onclick="setGeminiTalker('star')">✦ التحدث مع النجم</button><button class="chip ${kind==='planet'?'on':''}" onclick="setGeminiTalker('planet')">🪐 التحدث مع الكوكب</button></div>
  <div class="gemini-connection" style="margin:0 0 10px"><i class="gemini-led offline" id="gemini-chat-led"></i><div class="gemini-status-text" id="gemini-chat-status">يجري فحص اتصال Gemini…</div></div>
- <div class="gemini-chat-note">ردود جديدة من Google Gemini · سياق مستقل لكل نجم ولكل شخصية</div>
- <div id="cl" class="chat-thread">${ST.chat.map(m=>bubble(m,s)).join('')}${ST.geminiBusy?'<div class="gemini-thinking"><i></i><i></i><i></i><span>يفكر '+(kind==='planet'?'الكوكب':'النجم')+'…</span></div>':''}</div>
- <div class="prompt-pills">${['كيف حالك؟','من أنت؟','ماذا تعرف عن رحلتي؟','ما الذي تغيّر فيك؟','اقترح لي خطوة صغيرة','احكِ لي عن عالمك'].map(q=>`<button class="chip" onclick="ask('${q}')">${q}</button>`).join('')}</div>
+ <div class="gemini-chat-note">عند أول إرسال سيُطلب إذنك لمشاركة نص الحوار وسياق التقدم مع Google Gemini. البطاقات أدناه محلية ومصادرها ظاهرة.</div>
+ <div class="gemini-chat-tools"><div class="mu" style="font-size:10px">خلفية الحوار</div><div class="chat-wallpaper-row">${wallpaperButtons}</div>${dailyReminderPanel()}<button class="chip" onclick="toggleKnowledgeLibrary()">${saved?'★':'☆'} بطاقاتي المحفوظة (${saved})</button></div>
+ ${savedKnowledgeShelf()}
+ <div id="cl" class="chat-thread" style="--chat-wallpaper:url('${theme.url}')" aria-live="polite" aria-label="رسائل الحوار">${ST.chat.map((m,i)=>bubble(m,s,i)).join('')}${ST.geminiBusy?'<div class="gemini-thinking" role="status"><i></i><i></i><i></i><span>تتجمع ذرات الضوء… يفكر '+(kind==='planet'?'الكوكب':'النجم')+'</span></div>':''}</div>
+ <div class="mu" style="font-size:10px;margin:11px 0 3px">بطاقات معرفة بمصادر · اختر واحدة لعرضها وحفظها أو مشاركتها</div><div class="knowledge-pills"><button class="chip" onclick="showKnowledgeCard('quran_effort')">آية عن السعي</button><button class="chip" onclick="showKnowledgeCard('quran_creation')">آية من الصافات</button><button class="chip" onclick="showKnowledgeCard('ali_wisdom')">حكمة منسوبة</button><button class="chip" onclick="showKnowledgeCard('star_birth')">ولادة النجوم</button><button class="chip" onclick="showKnowledgeCard('neutron_star')">نجم نيوتروني</button><button class="chip" onclick="showKnowledgeCard('stellar_elements')">عناصر النجوم</button></div>
+ <div class="prompt-pills">${['كيف حالك؟','من أنت؟','ماذا تعرف عن رحلتي؟','اقترح لي خطوة صغيرة','أحتاج تشجيعاً'].map(q=>`<button class="chip" onclick="ask('${q}')">${q}</button>`).join('')}</div>
  <div class="chat-compose"><input type="text" id="ci" placeholder="اكتب لـ${who}…" ${ST.geminiBusy?'disabled':''} onkeydown="if(event.key==='Enter')ask()"><button class="btn" onclick="ask()" ${ST.geminiBusy?'disabled':''}>${ST.geminiBusy?'…':'إرسال'}</button></div>`}
-function bubble(m,s){const t=soulEsc(String(m.t||''));if(m.w==='me')return `<div class="msg-row me"><div class="msg me">${t}</div></div>`;const label=m.cosmicName?`<div class="gemini-message-label">${soulEsc(m.cosmicName)}</div>`:'';if(m.cosmic)return `<div class="msg-row st cosmic-message"><div class="msg-avatar" style="background:radial-gradient(circle,#263e5b,#091321 72%);border-color:#83c5e766"><i></i></div><div>${label}<div class="msg st" style="border-color:#83c5e733;background:linear-gradient(135deg,#111b2b,#09131d);box-shadow:inset 0 1px #ffffff08">${t}</div></div></div>`;return `<div class="msg-row st"><div class="msg-avatar"><i></i></div><div>${label}<div class="msg st">${t}</div></div></div>`}
-function cAfter(){$('#ps').value=S.pers;const cl=$('#cl');if(cl)cl.scrollTop=cl.scrollHeight;refreshGeminiStatus(false)}
+function bubble(m,s,index=0){
+ if(m.knowledgeId)return knowledgeCardMarkup(m.knowledgeId,index);
+ const t=soulEsc(String(m.t||''));if(m.w==='me')return `<div class="msg-row me"><div class="msg me">${t}</div></div>`;
+ if(m.system)return `<div class="msg-row st"><div class="chat-error" role="alert">${t}<br><button type="button" onclick="retryGeminiLast()">إعادة المحاولة</button></div></div>`;
+ const label=m.cosmicName?`<div class="gemini-message-label">${soulEsc(m.cosmicName)}</div>`:'';const cls=m.cosmic?'cosmic-message':'';
+ const panel=m.cosmic?`<div class="msg st" style="border-color:#83c5e766;background:linear-gradient(135deg,#111b2b,#09131d);box-shadow:inset 0 1px #ffffff08">${t}</div>`:`<div class="msg st">${t}</div>`;
+ return `<div class="msg-row st ${cls}"><div class="msg-avatar" ${m.cosmic?'style="background:radial-gradient(circle,#263e5b,#091321 72%);border-color:#83c5e766"':''}><i></i></div><div>${label}${panel}${!m.cosmic?`<div class="chat-ai-actions"><button type="button" data-chat-voice="${index}" onclick="speakChatMessage(${index},this)" aria-label="استمع إلى الرد">◖))) استمع</button></div>`:''}</div></div>`}
+function cAfter(){const ps=$('#ps');if(ps)ps.value=S.pers;const cl=$('#cl');if(cl)cl.scrollTop=cl.scrollHeight;refreshGeminiStatus(false)}
 async function ask(q){
  const input=$('#ci');q=String(q||input?.value||'').trim();if(!q||ST.geminiBusy)return;COSMOS.lastInteraction=Date.now();ensureChatSession();
  // Keep short-lived alien encounters as an optional cosmic event, separate from the main Gemini conversation.
  if(ST.cosmosDialogue&&ST.cosmosDialogue.remaining>0){const d=ST.cosmosDialogue,A=ALIENS[d.alien];ST.chat.push({w:'me',t:q});d.remaining--;if(A&&d.remaining>0)ST.chat.push({w:'st',t:`${A.glyph} ${A.name}: ${cosmosPick(A.lines)}`,cosmic:true,cosmicKind:'alien',cosmicName:A.name});else{ST.chat.push({w:'st',t:`${A?A.glyph+' '+A.name:'✦'}: سأترك لك ضوءاً صغيراً، إلى لقاءٍ آخر.`,cosmic:true,cosmicKind:'alien',cosmicName:A?.name||''});ST.cosmosDialogue=null}persistActiveChat();render();$('#v').scrollTop(1e5);return}
- const kind=geminiKind(),s=cur();ST.chat.push({w:'me',t:q});ST.geminiBusy=true;persistActiveChat();render();
+ if(!ensureGeminiConsent())return;const kind=geminiKind(),s=cur();ST.chat.push({w:'me',t:q});ST.geminiBusy=true;persistActiveChat();render();
  try{
   const answer=await requestGeminiReply(s,kind);
   ST.chat.push({w:'st',t:answer,ai:true,character:kind});

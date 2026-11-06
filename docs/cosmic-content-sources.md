@@ -1,0 +1,24 @@
+# مصادر البطاقات الكونية والدينية
+
+تاريخ التحقق: 2026-11-07. هذا الملف يسجل النصوص والحقائق التي يمكن عرضها كبطاقات داخل MY SPACE. التأملات الأدبية التي يضيفها التطبيق ليست تفسيرًا دينيًا ولا حقيقة علمية.
+
+## القرآن الكريم
+
+- سورة الصافات، الآية 96: `وَاللَّهُ خَلَقَكُمْ وَمَا تَعْمَلُونَ`. راجعت النص والمرجع من [Quran.com، الصافات 37:96](https://quran.com/as-saffat/96). تُعرض الآية مع اسم السورة ورقمها فقط، ولا تُحوَّل إلى ادعاء علمي.
+- سورة النجم، الآية 39: `وَأَنْ لَيْسَ لِلْإِنْسَانِ إِلَّا مَا سَعَىٰ`. راجعت النص والمرجع من [Quran.com، النجم 53:39](https://quran.com/an-najm/39). أي جملة تأملية مرافقة موسومة بأنها تأمل أدبي، وليست تفسيرًا للآية.
+
+## حكمة منسوبة
+
+- تورد [مؤسسة علوم نهج البلاغة، مقالة «أخلاق الإمام علي عليه السلام»](https://inahj.org/shortresearchwisdomstring/3275) عبارة `مَنْ حَاسَبَ نَفْسَه رَبِحَ ومَنْ غَفَلَ عَنْهَا خَسِرَ` منسوبة إلى الإمام علي عليه السلام، وتحيل المقالة إلى كتاب *أخلاق الإمام علي عليه السلام*، ج1، ط8، ص374–377. لذلك تُسمّى في التطبيق «حكمة منسوبة» لا «حديثًا صحيحًا» ولا تُنسب إلى الإمام الكاظم؛ فهذا تصحيح لنسبة المثال الواردة في المقترح المرفق، وليس حكمًا على صحة السند.
+
+## الفضاء والفيزياء
+
+- تتكوّن النجوم داخل سحب كبيرة من الغاز والغبار تُسمى السحب الجزيئية، وتتجمع بعض مناطقها الكثيفة بفعل الجاذبية حتى تنشأ نجوم أولية. المصدر: [NASA Science، Star Basics](https://science.nasa.gov/universe/stars/).
+- تذكر صفحة NASA أن بقايا النجم النيوتروني قد تحمل كتلة تقارب كتلة الشمس مضغوطة في جسم قطره نحو 20 كم؛ والخصائص تختلف بين الأجرام. المصدر: [NASA Imagine the Universe، Neutron Stars](https://imagine.gsfc.nasa.gov/science/objects/neutron_stars1.html).
+- توضح NASA أن الاندماج النجمي يستطيع تكوين عناصر أثقل، مثل الكربون والأكسجين، وأن المواد المقذوفة من النجوم والمستعرات تُثري السحب التي تولّد أجيالًا لاحقة. المصدر: [NASA Science، Star Basics](https://science.nasa.gov/universe/stars/) و[NASA Cosmicopia، Nucleosynthesis](https://science.gsfc.nasa.gov/attic/cosmicopia.gsfc.nasa.gov/nucleo.html). نتجنب العبارة المطلقة «كل أجسامنا مصنوعة من غبار النجوم»؛ لأنها تحتاج تفصيلًا عن أصول العناصر المختلفة.
+
+## مصادر تنفيذ Android
+
+- Android 13 فأحدث يتطلب إذن `POST_NOTIFICATIONS` للتنبيهات غير المستثناة، ويُستحسن طلبه بعد اختيار المستخدم للميزة وفي سياقها: [Android Developers، Notification runtime permission](https://developer.android.com/develop/ui/views/notifications/notification-permission).
+- Android 8 فأحدث يشترط قنوات الإشعارات: [Android Developers، Create and manage notification channels](https://developer.android.com/develop/ui/views/notifications/channels).
+- يُستخدم منبّه غير دقيق لتذكير اختياري؛ قد يؤخره وضع Doze وتوفير الطاقة. لا يحتاج التطبيق إذن المنبه الدقيق ما دام لا يستخدم `setExact*`: [Android Developers، Schedule alarms](https://developer.android.com/develop/background-work/services/alarms).

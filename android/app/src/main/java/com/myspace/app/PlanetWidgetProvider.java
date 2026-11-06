@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.widget.RemoteViews;
@@ -130,6 +131,27 @@ public final class PlanetWidgetProvider extends AppWidgetProvider {
                         Color.parseColor("#03070a")},
                 new float[]{0f, 0.62f, 1f}, Shader.TileMode.CLAMP));
         canvas.drawCircle(cx, cy, radius, paint);
+
+        // Subtle curved cloud bands add surface depth while staying within the bitmap mask.
+        canvas.save();
+        Path globeMask = new Path();
+        globeMask.addCircle(cx, cy, radius * 0.995f, Path.Direction.CW);
+        canvas.clipPath(globeMask);
+        paint.setShader(null);
+        paint.setStyle(Paint.Style.STROKE);
+        for (int i = 0; i < 7; i++) {
+            float offset = (i - 3) * radius * 0.235f;
+            float wave = radius * (0.035f + (i % 2) * 0.018f);
+            Path band = new Path();
+            band.moveTo(cx - radius, cy + offset);
+            band.cubicTo(cx - radius * 0.42f, cy + offset - wave,
+                    cx + radius * 0.28f, cy + offset + wave,
+                    cx + radius, cy + offset - wave * 0.28f);
+            paint.setColor(withAlpha(i % 2 == 0 ? c1 : c3, 24 + (i % 3) * 9));
+            paint.setStrokeWidth(size * (i % 3 == 0 ? 0.009f : 0.006f));
+            canvas.drawPath(band, paint);
+        }
+        canvas.restore();
 
         paint.setShader(new RadialGradient(cx + radius * 0.55f, cy + radius * 0.4f,
                 radius * 1.25f,

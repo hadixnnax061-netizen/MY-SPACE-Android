@@ -1,4 +1,4 @@
-const CACHE='my-space-v16.2-cosmic-refresh';
+const CACHE='my-space-v3.0-shader-refresh';
 const CORE=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 const isAppAsset=url=>url.pathname==='/'||url.pathname.endsWith('/index.html')||url.pathname.endsWith('/manifest.webmanifest')||url.pathname.endsWith('/sw.js')||url.pathname.includes('/icons/');
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));

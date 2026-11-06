@@ -457,7 +457,7 @@ nav{background:rgba(3,9,14,.74)!important;backdrop-filter:blur(16px);-webkit-bac
 
 
 
-/* ===== v16.2: Texter + larger visual stage + texture presets ===== */
+/* ===== v3.0: Texter + larger visual stage + texture presets ===== */
 #app{max-width:640px}
 @media(max-width:600px){.hero-canvas{aspect-ratio:5/6}}
 body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 18% 6%,rgba(96,48,190,.26),transparent 46%),radial-gradient(ellipse at 84% 18%,rgba(0,120,140,.22),transparent 48%),radial-gradient(ellipse at 50% 102%,rgba(44,46,150,.24),transparent 55%)}
@@ -483,7 +483,7 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;bac
 /* Touch should not leave a focus ring around the interactive cosmos. */
 canvas.interactive-3d:focus,canvas.interactive-3d:focus-visible{outline:none!important}
 
-/* ===== v16.2: OLED black, edge-to-edge nav, home-screen widget ===== */
+/* ===== v3.0: OLED black, edge-to-edge nav, home-screen widget ===== */
 :root{--bg:#000!important;--pn:#000!important;--ln:#1b1b1b!important;--android-nav-bottom:0px}
 html,body{background:#000!important;padding-bottom:0!important}
 body{background:#000!important}
@@ -1217,8 +1217,13 @@ function paintTrue3DSphere(x,P,r,t,ang,W,viewYaw,viewPitch,viewRoll){
  const specStrength=material==='metal'?.34:material==='glass'?.38:(.075+(1-rough)*.14);
  const yaw=viewYaw+ang*.72,pitch=viewPitch+Math.sin(t*.16)*.025,roll=viewRoll+ang*.08;
  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch),cr=Math.cos(roll),sr=Math.sin(roll);
- const Lx=-.48,Ly=-.57,Lz=.67,invL=1/Math.hypot(Lx,Ly,Lz),lx=Lx*invL,ly=Ly*invL,lz=Lz*invL;
- const hxv=lx,hyv=ly,hzv=lz+1,invH=1/Math.hypot(hxv,hyv,hzv),hlx=hxv*invH,hly=hyv*invH,hlz=hzv*invH;
+	 const Lx=-.48,Ly=-.57,Lz=.67,invL=1/Math.hypot(Lx,Ly,Lz),lx=Lx*invL,ly=Ly*invL,lz=Lz*invL;
+	 const l1x=cy*lx-sy*lz,l1z=sy*lx+cy*lz,l1y=cp*ly+sp*l1z,l2z=-sp*ly+cp*l1z;
+	 const objLx=cr*l1x+sr*l1y,objLy=-sr*l1x+cr*l1y,objLz=l2z;
+	 const shadowRings=P.vis&&P.vis.rings===0?0:Math.max(P.rings||0,P.shape==='ringed'?3:0);
+	 const ringAngle=((P.tilt==null?50:P.tilt)-50)/50*.72,ringNY=Math.cos(ringAngle),ringNZ=Math.sin(ringAngle);
+	 const ringLDot=objLy*ringNY+objLz*ringNZ,ringScale=1.25-(P.grav==null?50:P.grav)/100*.6;
+	 const hxv=lx,hyv=ly,hzv=lz+1,invH=1/Math.hypot(hxv,hyv,hzv),hlx=hxv*invH,hly=hyv*invH,hlz=hzv*invH;
  const TAU=Math.PI*2,isImage=P.shape==='image'&&P.tmode!=='flat'?v8ImagePixels(img(P.tex)):null;
  const craters=[];
  if(sf==='craters')for(let i=0;i<12;i++){
@@ -1262,14 +1267,44 @@ function paintTrue3DSphere(x,P,r,t,ang,W,viewYaw,viewPitch,viewRoll){
      R=rrr+(c3[0]-rrr)*Math.max(0,n3-.38)*.12;G=ggg+(c3[1]-ggg)*Math.max(0,n3-.38)*.12;B=bbb+(c3[2]-bbb)*Math.max(0,n3-.38)*.12;
     }
    }
+   // Material layers are evaluated on the same rotating UV sphere as its base texture.
+   if(material==='gas'){
+    const cloudField=Math.sin(lon*4.4+n1*1.7+Math.sin(lat*7.2+seed)*.6+t*.12)+Math.sin(lat*5.5-lon*2.2+n2*1.2),cloud=v8Smooth(-.52,.72,cloudField)*(.12+.16*detail);
+    R+=(c3[0]-R)*cloud;G+=(c3[1]-G)*cloud;B+=(c3[2]-B)*cloud;
+   }else if(material==='sand'){
+    const grain=Math.pow(Math.max(0,.5+n3*.5),12)*detail*.16;
+    R+=(c3[0]-R)*grain;G+=(c3[1]-G)*grain;B+=(c3[2]-B)*grain;
+   }else if(material==='digital'){
+    const grid=Math.max(0,1-v8Smooth(.055,.2,Math.min(Math.abs(Math.sin(lon*14+seed*.11)),Math.abs(Math.sin(lat*18+seed*.07)))))*(.12+.22*detail);
+    R+=(c3[0]-R)*grid;G+=(c3[1]-G)*grid;B+=(c3[2]-B)*grid;
+   }
    // The iris is mapped onto the curved surface, so it turns with the planet.
    if(P.shape==='eye'&&uz>.78){const irisAng=Math.acos(v8Clamp(uz,-1,1)),phi=Math.atan2(uy,ux),iris=irisAng/.62;if(iris<1){const fiber=.5+.5*Math.sin(phi*34+Math.sin(phi*9)*2+seed),blend=.62*(1-v8Smooth(.82,1,iris)),ir=c1[0]+(c3[0]-c1[0])*(.45+.35*fiber),ig=c1[1]+(c3[1]-c1[1])*(.45+.35*fiber),ib=c1[2]+(c3[2]-c1[2])*(.45+.35*fiber);R+=(ir-R)*blend;G+=(ig-G)*blend;B+=(ib-B)*blend;if(iris<.31){R=R*.02;G=G*.02;B=B*.02}if(iris<.105){R=R*.15;G=G*.15;B=B*.15}}}
-   const ndl=snx*lx+sny*ly+nz*lz,day=v8Smooth(-.28,.34,ndl),diff=.22+.78*Math.pow(day,.96),shade=diff*(.94+.06*(1-rough)),ndh=Math.max(0,nx*hlx+ny*hly+nz*hlz),spec=Math.pow(ndh,Math.max(12,specPower*.72))*specStrength*(.42+.58*day),limb=Math.pow(1-nz,2.7),rimStrength=(P.shape==='lava'?.10:.045)+((P.glow||0)/100)*.045;
-   const addSpec=255*spec,rimR=c1[0]*limb*rimStrength,rimG=c1[1]*limb*rimStrength,rimB=c1[2]*limb*rimStrength;
+	   let ringShadow=0;
+	   if(shadowRings>0&&Math.abs(ringLDot)>.06){
+	    const plane=uy*ringNY+uz*ringNZ,rayT=-plane/ringLDot;
+	    if(rayT>0){
+	     const qx=ux+objLx*rayT,qy=uy+objLy*rayT,qz=uz+objLz*rayT,qplane=qy*ringNY+qz*ringNZ;
+	     const ringRadius=Math.sqrt(Math.max(0,qx*qx+qy*qy+qz*qz-qplane*qplane));
+	     const inner=1.62*ringScale-.07,outer=(1.62+Math.max(0,shadowRings-1)*.48)*ringScale+.18;
+	     const band=v8Smooth(inner,inner+.08,ringRadius)*(1-v8Smooth(outer-.12,outer,ringRadius));
+	     ringShadow=band*(.16+Math.min(4,shadowRings)*.055);
+	    }
+	   }
+	   const ndl=snx*lx+sny*ly+nz*lz,day=v8Smooth(-.28,.34,ndl);
+	   const micro=(n1*.62+n2*.28+n3*.1)*detail,microAlbedo=1+micro*(.018+.075*rough);
+	   const direct=.82*Math.pow(day,.92),shade=(.18+direct*(1-ringShadow))*microAlbedo*(.94+.06*(1-rough));
+   const ndh=Math.max(0,nx*hlx+ny*hly+nz*hlz),microGloss=Math.max(.72,1+micro*detail*.28);
+	   const spec=Math.pow(ndh,Math.max(10,specPower*.72*(1-.16*rough)))*specStrength*(.34+.66*day)*microGloss*(1-ringShadow*.92);
+   const fresnel=Math.pow(1-nz,material==='glass'?2.05:2.7),limb=Math.pow(1-nz,2.35);
+   const rimStrength=(P.shape==='lava'?.10:.04)+((P.glow||0)/100)*.04+((P.aura||0)/100)*.025;
+   const metal=material==='metal',glass=material==='glass',specTint=metal?c3:[255,255,255],specGain=glass?1.16:1;
+   const addR=specTint[0]*spec*specGain,addG=specTint[1]*spec*specGain,addB=specTint[2]*spec*specGain;
+   const fresnelGain=fresnel*(glass?.16:metal?.075:.035),rimR=c1[0]*limb*rimStrength+c3[0]*fresnelGain,rimG=c1[1]*limb*rimStrength+c3[1]*fresnelGain,rimB=c1[2]*limb*rimStrength+c3[2]*fresnelGain;
    if(P.shape==='lava'&&sf==='cracks'){const heat=Math.max(0,Math.min(1,(R-G*.52)/150));R+=heat*.16*255}
-   data[idx]=v8Clamp(R*shade+black[0]*(1-day)*.28+addSpec+rimR,0,255);
-   data[idx+1]=v8Clamp(G*shade+black[1]*(1-day)*.28+addSpec+rimG,0,255);
-   data[idx+2]=v8Clamp(B*shade+black[2]*(1-day)*.28+addSpec+rimB,0,255);
+   data[idx]=v8Clamp(R*shade+black[0]*(1-day)*.28+addR+rimR,0,255);
+   data[idx+1]=v8Clamp(G*shade+black[1]*(1-day)*.28+addG+rimG,0,255);
+   data[idx+2]=v8Clamp(B*shade+black[2]*(1-day)*.28+addB+rimB,0,255);
    data[idx+3]=Math.round(255*v8Clamp(edge*res*.85+.5,0,1));
   }
  }
@@ -1295,6 +1330,7 @@ function paintExtruded3DArt(x,P,r,ang,t,W,viewYaw,viewPitch,viewRoll,viewDepth){
  let handled=CORE2(q,P,r,ang,t,cg,W,poly)||CORE(q,P,r,ang,t,cg,W,poly);
  if(!handled){q.fillStyle=cg;q.beginPath();q.arc(0,0,r,0,Math.PI*2);q.fill()}
  MAT(q,P,r,ang,t,W);
+ paintUniversalSurfaceFinish(q,P,r,t,W,sh);
  q.restore();
  const m=e.maskCtx;m.setTransform(1,0,0,1,0,0);m.clearRect(0,0,size,size);m.drawImage(e.c,0,0);
  m.globalCompositeOperation='source-in';const side=m.createLinearGradient(0,0,size,size);side.addColorStop(0,'#244d58');side.addColorStop(.38,'#102b34');side.addColorStop(1,'#02070d');m.fillStyle=side;m.fillRect(0,0,size,size);m.globalCompositeOperation='source-over';
@@ -1309,6 +1345,25 @@ function paintExtruded3DArt(x,P,r,ang,t,W,viewYaw,viewPitch,viewRoll,viewDepth){
 
 /* ---------- renderer ---------- */
 const live=[];
+const PARTICLE_SPRITES=new Map();
+function particleSprite(color){
+ let sprite=PARTICLE_SPRITES.get(color);if(sprite)return sprite;
+ const size=36,c=document.createElement('canvas');c.width=c.height=size;
+ const p=c.getContext('2d');if(!p)return c;
+ const cx=18,cy=16,r=8.2;
+ const contact=p.createRadialGradient(cx+3,cy+8,1,cx+3,cy+8,12);
+ contact.addColorStop(0,'rgba(0,0,0,.34)');contact.addColorStop(.55,'rgba(0,0,0,.14)');contact.addColorStop(1,'rgba(0,0,0,0)');
+ p.fillStyle=contact;p.beginPath();p.ellipse(cx+3,cy+8,11,5,.12,0,Math.PI*2);p.fill();
+ const body=p.createRadialGradient(cx-3.1,cy-3.6,.7,cx,cy,r);
+ body.addColorStop(0,'rgba(255,255,255,.98)');body.addColorStop(.16,rgba(color,.98));
+ body.addColorStop(.58,rgba(color,.94));body.addColorStop(.84,'rgba(5,12,22,.82)');body.addColorStop(1,'rgba(5,12,22,.12)');
+ p.fillStyle=body;p.beginPath();p.arc(cx,cy,r,0,Math.PI*2);p.fill();
+ const glint=p.createRadialGradient(cx-3.2,cy-3.5,0,cx-3.2,cy-3.5,3.5);
+ glint.addColorStop(0,'rgba(255,255,255,.92)');glint.addColorStop(1,'rgba(255,255,255,0)');
+ p.globalCompositeOperation='screen';p.fillStyle=glint;p.beginPath();p.arc(cx-3.2,cy-3.5,3.5,0,Math.PI*2);p.fill();
+ if(PARTICLE_SPRITES.size>=48)PARTICLE_SPRITES.delete(PARTICLE_SPRITES.keys().next().value);
+ PARTICLE_SPRITES.set(color,c);return c;
+}
 function draw(c,P,t,rot,bur,o,dt=1,fx=[]){
  const x=c.__ctx||c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H/2;
  if(!x||!W||!H)return;
@@ -1466,8 +1521,13 @@ function draw(c,P,t,rot,bur,o,dt=1,fx=[]){
     const tr=x.createLinearGradient(tx,ty,px,py);tr.addColorStop(0,rgba(col,0));tr.addColorStop(1,rgba(col,alpha*.72));
     x.strokeStyle=tr;x.lineWidth=Math.max(.55*lw,size*.82);x.beginPath();x.moveTo(tx,ty);x.lineTo(px,py);x.stroke();
    }
-   x.fillStyle=rgba(col,alpha);x.shadowColor=col;x.shadowBlur=(i%5===0?5.5:2.2)*lw*depth*lifeScale;
-   x.beginPath();x.arc(px,py,size,0,TAU);x.fill();
+   const particleSize=size*4.5;
+   x.save();x.globalCompositeOperation='source-over';x.globalAlpha=alpha;
+   x.drawImage(particleSprite(col),px-particleSize*.5,py-particleSize*.5,particleSize,particleSize);
+   x.restore();
+   x.globalCompositeOperation='lighter';x.fillStyle=rgba(col,alpha*.24);
+   x.shadowColor=col;x.shadowBlur=(i%5===0?5.5:2.2)*lw*depth*lifeScale;
+   x.beginPath();x.arc(px,py,size*.72,0,TAU);x.fill();
    if(i%17===0&&life>.42){x.strokeStyle=rgba(P.c1,alpha*.52);x.lineWidth=.65*lw;x.beginPath();x.arc(px,py,size*(1.8+midBoost*.12),0,TAU);x.stroke()}
   }
   x.shadowBlur=0;x.restore();
@@ -2624,6 +2684,27 @@ function texPickerHTML(){
 
 let UH=[],UR=[],ULT=0;
 const PRE=[['شمس',{shape:'star',surf:'smooth',c1:'#ffd36b',c2:'#ff6a1f',c3:'#fff0b0',sides:9,detail:30,glow:90,aura:70,parts:40,neb:30,seed:5}],['عملاق جليدي',{shape:'sphere',surf:'bands',c1:'#bfeaff',c2:'#2a6fb5',c3:'#ffffff',detail:70,glow:35,aura:55,parts:25,neb:40,seed:11}],['عالم الحمم',{shape:'sphere',surf:'cracks',c1:'#5a1c0c',c2:'#8a1d0a',c3:'#ff8a1f',detail:80,glow:60,aura:45,parts:30,neb:35,seed:3}],['قلب بلوري',{shape:'crystal',c1:'#d9c7ff',c2:'#6a3fd1',c3:'#7ff3ff',sides:7,glow:75,aura:60,parts:55,neb:45,seed:9}],['زهرة سديمية',{shape:'flower',c1:'#ff9ad5',c2:'#7a3cff',c3:'#ffe08a',sides:10,detail:60,glow:70,aura:80,parts:60,neb:70,seed:14}],['كوازار',{shape:'hole',c1:'#00cfc1',c2:'#101a40',c3:'#e0b252',tilt:62,glow:80,aura:60,parts:70,neb:55,seed:2}],['مجرة',{shape:'spiral',c1:'#fff2c9',c2:'#3b2a8f',c3:'#6ad0ff',sides:6,detail:55,glow:60,aura:50,parts:30,neb:60,seed:8}],['كوكب أخضر',{shape:'sphere',surf:'land',c1:'#58c27a',c2:'#134c6b',c3:'#e9e2b5',detail:65,glow:30,aura:60,parts:20,neb:25,seed:17}],['شبكة هندسية',{shape:'geo',c1:'#00cfc1',c2:'#0b3b46',c3:'#a8ff7a',sides:5,detail:70,glow:65,aura:35,parts:25,neb:20,seed:6}]];
+
+
+function paintUniversalSurfaceFinish(x,P,r,t,W,shape){
+ const mat=P.mat||'plain',rough=v8Clamp((P.rough==null?24:P.rough)/100,0,1);
+ const gain=mat==='glass'?.42:mat==='metal'?.34:mat==='gas'?.24:mat==='digital'?.20:.16;
+ const sx=-r*.32+Math.sin(t*.11+(P.seed||7))*.025*r,sy=-r*.39,spread=r*(.18+.24*rough),gloss=gain*(1-.54*rough);
+ x.save();x.globalCompositeOperation='source-atop';
+ const sweep=x.createLinearGradient(-r,-r,r,r);
+ sweep.addColorStop(0,rgba(P.c2,0));sweep.addColorStop(.32,rgba(P.c1,gain*.12));
+ sweep.addColorStop(.52,rgba('#ffffff',gain*.16*(1-.35*rough)));sweep.addColorStop(.72,rgba(P.c3,gain*.08));sweep.addColorStop(1,rgba(P.c2,0));
+ x.fillStyle=sweep;x.fillRect(-r*1.8,-r*1.8,r*3.6,r*3.6);
+ const glint=x.createRadialGradient(sx,sy,0,sx,sy,spread*2.8);
+ glint.addColorStop(0,rgba('#ffffff',gloss*.68));glint.addColorStop(.16,rgba(P.c1,gloss*.38));
+ glint.addColorStop(.54,rgba(P.c3,gloss*.11));glint.addColorStop(1,rgba(P.c1,0));
+ x.fillStyle=glint;x.beginPath();x.ellipse(sx,sy,spread*2.8,spread*1.55,-.55,0,Math.PI*2);x.fill();
+ const rim=x.createRadialGradient(0,0,r*.62,0,0,r*1.12);
+ rim.addColorStop(0,rgba(P.c1,0));rim.addColorStop(.76,rgba(P.c1,0));
+ rim.addColorStop(.92,rgba(P.c1,gain*.24));rim.addColorStop(1,rgba(P.c3,gain*.08));
+ x.fillStyle=rim;x.beginPath();x.arc(0,0,r*1.12,0,Math.PI*2);x.fill();
+ x.restore();
+}
 
 PRE.push(
  ['الشفق الشمالي',{shape:'aurora',c1:'#7ff3c0',c2:'#3a6fb8',c3:'#c8a6ff',glow:60,aura:70,parts:38,neb:70,seed:8,detail:62,sym:45},'ستائر ضوء تتراقص — للهدوء والتأمل'],

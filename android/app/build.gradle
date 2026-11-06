@@ -19,8 +19,8 @@ android {
         applicationId 'com.myspace.app'
         minSdk 24
         targetSdk 35
-        versionCode 16020
-        versionName '16.2.0'
+        versionCode 16021
+        versionName '3.0'
     }
 
     signingConfigs {

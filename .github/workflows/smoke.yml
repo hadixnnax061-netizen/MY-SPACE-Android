@@ -44,7 +44,7 @@ jobs:
           mkdir -p build-artifact
           gh run download "${{ steps.build.outputs.run_id }}" \
             -R "$GITHUB_REPOSITORY" -n MY-SPACE-APK -D build-artifact
-          cp build-artifact/MY-SPACE-v16.2-debug.apk app.apk
+          cp build-artifact/MY-SPACE-v3.0-debug.apk app.apk
           test -s app.apk
           ls -lh app.apk
 

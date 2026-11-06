@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#061116"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="MY SPACE"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="description" content="MY SPACE — عالمك الكوني ومهامك، مع حفظ محلي وودجات قابلة للتخصيص."><link rel="manifest" href="./manifest.webmanifest">
-<title>MY SPACE — True 3D v15 Optimized Cosmos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="MY SPACE"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="description" content="MY SPACE — عالمك الكوني ومهامك، مع حفظ محلي وودجات قابلة للتخصيص."><link rel="manifest" href="./manifest.webmanifest">
+<title>MY SPACE — كوكبك وعاداتك</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22><text y=%22.9em%22 font-size=%228%22>✦</text></svg>">
 <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png"><link rel="apple-touch-icon" href="./icons/icon-192.png"><link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
@@ -584,10 +584,13 @@ nav button.on{color:var(--cy)!important;box-shadow:inset 0 2px 0 var(--cy),inset
 .compare-tile,.tl-item,.tex-tile{background:linear-gradient(145deg,#111b26,#080e15)!important;border-color:#293945!important}
 .toast{background:#111e29!important;border-color:#62f1e678!important;color:#edf5f8;box-shadow:0 12px 32px #000b,0 0 22px #62f1e618!important}
 .icon-btn{background:linear-gradient(145deg,#151f2a,#0a1017)!important;border-color:#354854!important;color:#edf5f8!important}
+.task-check{width:44px;height:44px;min-width:44px;border-color:var(--task-accent)!important;color:var(--task-accent)!important;background:#0b121a!important}
+.star-tile:focus-visible{outline:2px solid var(--cy)!important;outline-offset:3px!important;border-color:var(--cy)!important}
+.star-tile.active{border-color:var(--cy)!important;box-shadow:0 0 0 1px #62f1e64a,0 12px 30px #0009,0 0 28px #62f1e612!important}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
- outline:2px solid #8afff3!important;outline-offset:3px!important
+ outline:2px solid var(--cy)!important;outline-offset:3px!important
 }
-@media(max-width:380px){main{padding-inline:12px}.quick-actions{gap:6px}.home-summary{gap:6px}.home-summary div{padding-inline:3px}.hero-stage{margin-inline:-2px}}
+@media(max-width:380px){main{padding-inline:12px}.quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quick-actions .btn-quiet{min-height:46px;font-size:12px}.home-summary{gap:6px}.home-summary div{padding-inline:3px}.hero-stage{margin-inline:-2px}}
 @media(min-width:700px){#app{max-width:720px}main{padding-inline:24px}.hero-stage{border-radius:30px}}
 @media(prefers-reduced-motion:reduce){.hero-stage::before,.hero-stage::after{animation:none!important}.card,.task-card,nav button,.bar i{transition:none!important}}
 </style></head><body>
@@ -607,8 +610,9 @@ const SHN={sphere:'كوكب',crystal:'بلورة',geo:'هندسي',star:'نجم�
 const ATT={core:'النواة',energy:'الطاقة',aura:'الهالة',orbits:'المدارات',particles:'الجسيمات'};
 const UNL={core:'تتحول النواة نحو شكلها النهائي',energy:'تقوى الإضاءة والنبض',aura:'تتوسع الهالة وتتبدل ألوانها',orbits:'يظهر مدار أو قمر جديد',particles:'تزداد الجسيمات وتتغير ألوانها'};
 const STG=['البذرة','الاستيقاظ','التكوين','التطور','الارتقاء'];
-const D=()=>({shape:'sphere',c1:'#00cfc1',c2:'#008080',c3:'#7658c8',size:1,glow:35,aura:25,parts:15,rings:0,moons:0,trail:15,speed:30,pulse:25,corona:0,vis:{},sides:6,surf:'smooth',detail:40,seed:7,tilt:50,neb:25,tex:'',tmode:'sphere',mat:'plain',rough:20,sym:100,temp:50,opq:100,grav:50});
-const FIN=()=>({shape:'crystal',c1:'#9ff5ee',c2:'#7658c8',c3:'#e0b252',size:1.15,glow:85,aura:80,parts:85,rings:2,moons:2,trail:60,speed:45,pulse:55,corona:70,vis:{},sides:8,surf:'swirl',detail:70,seed:21,tilt:60,neb:55,tex:'',tmode:'sphere',mat:'plain',rough:25,sym:90,temp:50,opq:100,grav:50});
+function cleanLabel(value,max=120){return String(value==null?'':value).replace(/[\u0000-\u001f\u007f<>"'`]/g,'').trim().slice(0,max)}
+const D=()=>({shape:'sphere',c1:'#62f1e6',c2:'#177f99',c3:'#a58bff',size:1,glow:35,aura:25,parts:15,rings:0,moons:0,trail:15,speed:30,pulse:25,corona:0,vis:{},sides:6,surf:'smooth',detail:40,seed:7,tilt:50,neb:25,tex:'',tmode:'sphere',mat:'plain',rough:20,sym:100,temp:50,opq:100,grav:50});
+const FIN=()=>({shape:'crystal',c1:'#b6fff6',c2:'#7658c8',c3:'#f0c674',size:1.15,glow:85,aura:80,parts:85,rings:2,moons:2,trail:60,speed:45,pulse:55,corona:70,vis:{},sides:8,surf:'swirl',detail:70,seed:21,tilt:60,neb:55,tex:'',tmode:'sphere',mat:'plain',rough:25,sym:90,temp:50,opq:100,grav:50});
 let S={stars:[],cur:null,pers:'calm',time:true,calm:false,fxLevel:60,bright:70,touchScale:60,spinDamp:90,av:32,sv:42,amb:'off',view3d:{sensitivity:105,inertia:84,depth:72,zoom:100,yaw:0,pitch:0,roll:0,autoRotate:true,invertY:false}};
 try{S=Object.assign(S,JSON.parse(localStorage.getItem('cosmos1')||'{}'))}catch(e){}
 S.cosmos=Object.assign({enabled:true,frequency:100,interactivity:100,lastShowerAt:0,lastDyingAt:0},S.cosmos||{});
@@ -1948,11 +1952,13 @@ document.addEventListener('pointerup',e=>{const t=e.target;if(t&&t.closest&&t.cl
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){const away=Date.now()-COSMOS.lastInteraction;if(away>5*60*1000){const whispers=['نحن هنا منذ البداية.','النجوم لا تنسى.','أنت محاط بضوء لا تراه دائماً.'];cosmosWhisper(cosmosPick(whispers))}COSMOS.lastInteraction=Date.now();COSMOS.nextSpawnAt=performance.now()+5000+Math.random()*5000}});
 
 let lastFrame=0;
+let loopRaf=0;
 const reducedMotionQuery=window.matchMedia?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
 const reduceMotion=()=>!!(reducedMotionQuery&&reducedMotionQuery.matches);
 function loop(ms){
- if(document.hidden){lastFrame=ms;requestAnimationFrame(loop);return}
- if(lastFrame&&ms-lastFrame<DEVICE_PROFILE.frameMs){requestAnimationFrame(loop);return}
+ loopRaf=0;
+ if(document.hidden){lastFrame=0;return}
+ if(lastFrame&&ms-lastFrame<(reduceMotion()?1000/12:DEVICE_PROFILE.frameMs)){scheduleMainLoop();return}
  const raw=lastFrame?Math.min(2.5,(ms-lastFrame)/16.667):1;lastFrame=ms;
  const motion=reduceMotion()?.22:(S.calm?.58:1),dt=raw*motion,t=ms/1000*motion;
  updateGaze(ms,raw);updateAudioLevels();updateSoulRealtime(ms);
@@ -1989,9 +1995,11 @@ function loop(ms){
    }catch(e){const cx=it.c.__ctx;if(cx)cx.clearRect(0,0,it.c.width,it.c.height)}
   }
  }
- requestAnimationFrame(loop)
+ scheduleMainLoop()
 }
-requestAnimationFrame(loop);
+function scheduleMainLoop(){if(!document.hidden&&!loopRaf)loopRaf=requestAnimationFrame(loop)}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(loopRaf)cancelAnimationFrame(loopRaf);loopRaf=0;lastFrame=0}else{lastFrame=0;scheduleMainLoop()}},{passive:true});
+scheduleMainLoop();
 /* ---------- state actions ---------- */
 function toast(m){uiToast(m);const e=$('#ts');e.textContent=m;e.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove('on'),2600)}
 function nextTh(p){return[25,50,75,100].find(v=>v>p)||100}
@@ -2075,14 +2083,14 @@ function taskGrid(t){const st=taskStreak(t),set=new Set(st.dates),cells=[];for(l
 function tkH(t){
  const hist=taskDates(t),d=hist.includes(today())||(t.once&&t.n>0),col={core:'--cy',energy:'--go',aura:'--ne',orbits:'--te',particles:'--ok'}[t.attr]||'--cy';
  const freq=t.once?'مرة واحدة':t.cadence==='weekly'?`${Math.max(1,+t.weeklyTarget||1)}× أسبوعياً`:'يومية';
- return `<div class="task-card ${d?'done':''}" style="--task-accent:var(${col})"><button class="task-check" aria-label="إنجاز المهمة" onclick="done('${t.id}',this)">${d?'✓':''}</button><div class="task-body"><div class="task-title">${t.t}</div><div class="task-meta"><span class="task-attr">${ATT[t.attr]}</span><span>+${t.pts}%</span><span>${freq}</span>${t.n?`<span>· ${t.n}×</span>`:''}<button class="chip task-focus-chip" onclick="openFocusTask('${encodeURIComponent(t.id)}')" aria-label="التركيز على هذه المهمة">🎯 تركيز</button></div>${t.once?'':taskGrid(t)}</div><button class="task-more" aria-label="حذف المهمة" onclick="delT('${t.id}')">×</button></div>`;
+ return `<div class="task-card ${d?'done':''}" style="--task-accent:var(${col})"><button class="task-check" aria-label="${d?'مكتملة':'إنجاز المهمة'}: ${soulEsc(t.t)}" aria-pressed="${d?'true':'false'}" onclick="done('${t.id}',this)">${d?'✓':''}</button><div class="task-body"><div class="task-title">${soulEsc(t.t)}</div><div class="task-meta"><span class="task-attr">${ATT[t.attr]}</span><span>+${t.pts}%</span><span>${freq}</span>${t.n?`<span>· ${t.n}×</span>`:''}<button class="chip task-focus-chip" onclick="openFocusTask('${encodeURIComponent(t.id)}')" aria-label="التركيز على هذه المهمة">🎯 تركيز</button></div>${t.once?'':taskGrid(t)}</div><button class="task-more" aria-label="حذف المهمة" onclick="delT('${t.id}')">×</button></div>`;
 }
 function delT(id){const s=cur();s.tasks=s.tasks.filter(t=>t.id!==id);save();render()}
 function tasks(){const s=cur();return `${wiz()}<div class="page-head"><div><div class="brand-kicker">MY SPACE · ROUTINE</div><h1>مهام ${s.name}</h1></div><span class="badge">${s.tasks.length} مهام</span></div>${s.started?'':`<div class="card note-card"><b>رحلة التطور لم تبدأ بعد</b><div class="mu">تُحتسب المهام بعد الضغط على «ابدأ رحلة التطور» من الاستوديو.</div></div>`}<p class="page-intro">كل مهمة تغذّي جانباً محدداً من نجمك. لا عقوبة على الانقطاع، ولا يُفقد شيء مما اكتسبته.</p>
 <div class="card task-form"><div class="form-label">مهمة أو عادة جديدة</div><input type="text" id="tn" placeholder="${s.type=='goal'?'مثال: أنهِ فصلاً من الدورة':'مثال: اقرأ ٢٠ دقيقة'}"><div class="row form-selects"><label class="field-label">الجانب<select id="ta">${Object.keys(ATT).map(k=>`<option value="${k}">يطوّر: ${ATT[k]}</option>`).join('')}</select></label><label class="field-label">الحجم<select id="tp"><option value="4">خفيفة · ٤٪</option><option value="8" selected>متوسطة · ٨٪</option><option value="14">كبيرة · ١٤٪</option></select></label></div><div class="row form-selects"><label class="field-label">التكرار<select id="tcad" onchange="$('#wgoal').style.display=this.value==='weekly'?'block':'none'"><option value="daily">كل يوم</option><option value="weekly">هدف أسبوعي</option><option value="once">مرة واحدة</option></select></label><label class="field-label" id="wgoal" style="display:none">المرات أسبوعياً<select id="wt"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option></select></label></div><div class="row sp form-bottom"><button class="btn" onclick="addT()">＋ أضف المهمة</button></div></div>
 <div class="section-heading"><h2>قائمة مهامك</h2><span class="mu">سجل الإنجاز والاستمرارية</span></div>${s.tasks.length?s.tasks.map(tkH).join(''):emptyState('☾','قائمتك هادئة الآن','أضف مهمة صغيرة لتبدأ أول خطوة في نمو نجمك.',null,'')}
 ${insightBars(s)}${dayNoteCard()}<div class="info-footnote">حد التطور اليومي لكل جانب هو ٢٠٪ حتى لا تسرّع المهام الصغيرة نمو نجمك بلا معنى.</div>`}
-function addT(){const t=$('#tn').value.trim();if(!t){toast('اكتب اسم المهمة أولاً');return}
+function addT(){const t=cleanLabel($('#tn').value,120);if(!t){toast('اكتب اسم المهمة أولاً');return}
  const cadence=$('#tcad')?.value||'daily';cur().tasks.push({id:'t'+Date.now(),t,attr:$('#ta').value,pts:+$('#tp').value,once:cadence==='once',cadence,weeklyTarget:cadence==='weekly'?+($('#wt')?.value||3):1,n:0,last:'',history:[]});save();render()}
 function studio(){const s=cur(),T=s[ST.t],B=ST.t=='base';
  const sl=(k,l,mx=100)=>`<div class="sl"><div class="row sp"><span>${l}${lm(k)}</span><span class="mu" id="o_${k}">${T[k]}</span></div><input type="range" ${lm(k)?'disabled':''} min="0" max="${mx}" value="${T[k]}" oninput="setP('${k}',+this.value);$('#o_${k}').textContent=this.value"></div>`;
@@ -2423,8 +2431,10 @@ function settings(){const p=S.uiPrefs||{};soulPrefs();const status=linkedDataHan
 function uiSet(k,v){S.uiPrefs=S.uiPrefs||{};S.uiPrefs[k]=v;save();applyUIPrefs();if(k!=='scale')render()}
 let pwaInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();pwaInstallPrompt=e});async function installPWA(){if(pwaInstallPrompt){pwaInstallPrompt.prompt();try{await pwaInstallPrompt.userChoice}catch(e){}pwaInstallPrompt=null;return}toast('افتح قائمة المتصفح ثم اختر «إضافة إلى الشاشة الرئيسية» بعد نشر التطبيق على HTTPS')}
 
+function selectStar(id){if(!S.stars.some(s=>s.id===id))return;S.cur=id;save();render()}
+function starTileKey(e,id){if(e.key==='Enter'||e.key===' '){e.preventDefault();selectStar(id)}}
 function uni(){return `<div class="page-head"><div><div class="brand-kicker">MY SPACE · CONSTELLATION</div><h1>كونك</h1><div class="mu">${S.stars.length} نجوم · لكل نجم رحلته الخاصة</div></div><span class="universe-count">✦ ${S.stars.length}</span></div>
-<div class="stars-grid">${S.stars.map(s=>`<div class="star-tile ${s.id==cur().id?'active':''}" onclick="S.cur='${s.id}';save();render()"><canvas class="tile-canvas mc" data-i="${s.id}"></canvas><div class="tile-body"><div class="tile-name">${s.name}</div><div class="tile-meta"><span>${s.type=='goal'?'هدف':'عادة'}</span><span>·</span><span>${STG[stage(s)]}</span><span>·</span><span>${Math.round(avg(s))}%</span></div><div class="bar tile-bar"><i style="width:${avg(s)}%"></i></div><div class="tile-select">${s.id==cur().id?'النجم الحالي':'اختر هذا النجم'}</div></div></div>`).join('')}</div>
+<div class="stars-grid">${S.stars.map(s=>`<div class="star-tile ${s.id==cur().id?'active':''}" role="button" tabindex="0" aria-label="${soulEsc(s.name)}، ${STG[stage(s)]}، ${Math.round(avg(s))}%" aria-pressed="${s.id==cur().id?'true':'false'}" onclick="selectStar('${s.id}')" onkeydown="starTileKey(event,'${s.id}')"><canvas class="tile-canvas mc" data-i="${s.id}"></canvas><div class="tile-body"><div class="tile-name">${soulEsc(s.name)}</div><div class="tile-meta"><span>${s.type=='goal'?'هدف':'عادة'}</span><span>·</span><span>${STG[stage(s)]}</span><span>·</span><span>${Math.round(avg(s))}%</span></div><div class="bar tile-bar"><i style="width:${avg(s)}%"></i></div><div class="tile-select">${s.id==cur().id?'النجم الحالي':'اختر هذا النجم'}</div></div></div>`).join('')}</div>
 <h2>ولادة نجم جديد</h2><div class="card new-star-card"><input type="text" id="nn" placeholder="امنح نجمك اسماً"><div class="row" style="margin-top:10px"><button class="btn" onclick="newS('goal')">✦ نجم هدف</button><button class="btn g" onclick="newS('habit')">☾ نجم عادة</button></div></div>
 <div class="card"><b>تخصيص الواجهة</b><div class="mu" style="margin:5px 0 10px">أصبحت المصغّرات وإعدادات العرض في صفحات مستقلة لتصل إليها بسهولة.</div><div class="row"><button class="btn" onclick="setV('widgets')">افتح مصغّراتي</button><button class="btn g" onclick="setV('settings')">إعدادات التطبيق</button></div></div>
 ${achievementsSection()}
@@ -2632,9 +2642,9 @@ const undo=()=>swp(UH,UR),redo=()=>swp(UR,UH);
 function snap(s,txt){try{const c=document.createElement('canvas');c.width=c.height=200;draw(c,eff(s,s.prog),2,.6,[],{bg:1});(s.snaps=s.snaps||[]).push({d:today(),t:txt,img:c.toDataURL('image/jpeg',.7)});if(s.snaps.length>30)s.snaps.shift()}catch(e){}}
 function snapNow(){snap(cur(),'لحظة محفوظة');save();render();sfxShutter();toast('📸 حُفظت لحظة نجمك في الخط الزمني')}
 function cine(s,txt){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:fi .5s';d.innerHTML=`<div class="sw"></div><canvas style="width:min(72vw,330px);background:none"></canvas><div style="font-size:13px;letter-spacing:.35em;color:var(--cy)">EVOLUTION</div><b style="font-size:19px;text-align:center;padding:0 24px;line-height:1.7">${txt}</b><div class="mu">المس للمتابعة</div>`;d.onclick=()=>d.remove();document.body.appendChild(d);attach(d.querySelector('canvas'),()=>eff(s),{bg:1,int:1,starRef:s});const it=live[live.length-1];it.spin=2.2;it.kick=1;for(let i=0;i<50;i++){const a=Math.random()*6.28,v=.003+Math.random()*.01;it.bur.push({x:.5,y:.5,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:1.5})}sfxEvolve();setTimeout(()=>d.remove(),6000)}
-function newS(t){const n=$('#nn').value.trim()||'STAR '+(S.stars.length+1),s=mk(n,t);S.stars.push(s);S.cur=s.id;save();ST.t='base';ST.chat=[];ST.setup=1;setV('studio')}
+function newS(t){const n=cleanLabel($('#nn').value,48)||'STAR '+(S.stars.length+1),s=mk(n,t);S.stars.push(s);S.cur=s.id;save();ST.t='base';ST.chat=[];ST.setup=1;setV('studio')}
 function expD(){const s=cur();$('#dna').value=JSON.stringify({name:s.name,base:s.base,final:s.final});$('#dna').select();try{navigator.clipboard.writeText($('#dna').value)}catch(e){}toast('بصمة التصميم جاهزة للنسخ')}
-function impD(){try{const d=JSON.parse($('#dna').value),s=mk(d.name+' (مستورد)','goal');s.base=Object.assign(D(),d.base);s.final=Object.assign(FIN(),d.final);S.stars.push(s);S.cur=s.id;save();render()}catch(e){toast('البصمة غير صالحة')}}
+function impD(){try{const d=JSON.parse($('#dna').value),s=mk(cleanLabel((d.name||'STAR')+' (مستورد)',48),'goal');s.base=Object.assign(D(),d.base);s.final=Object.assign(FIN(),d.final);S.stars.push(s);S.cur=s.id;save();render()}catch(e){toast('البصمة غير صالحة')}}
 /* ===== v2: final form first, start journey, multiple final forms ===== */
 function seedOf(d){const g='#7d858c';return Object.assign({},d,{vis:{},c1:mix(d.c1,g,45),c2:mix(d.c2,g,45),c3:mix(d.c3,g,45),size:Math.max(.6,d.size*.72),glow:d.glow*.3,aura:d.aura*.1,parts:0,trail:0,pulse:d.pulse*.4,speed:d.speed*.5,corona:0,rings:0,moons:0,detail:(d.detail||0)*.35,neb:(d.neb||0)*.3})}
 function baseOf(s){return s.bs?s.base:seedOf(s.final)}
@@ -2650,7 +2660,7 @@ function eff(s,pp){const B=baseOf(s),F=s.final,k=window.RP==null?null:window.RP,
  days=Math.max(0,Math.floor((new Date(today())-new Date(s.born||today()))/864e5));
  return{shape:fs?F.shape:B.shape,...(fs?{sides:F.sides,surf:F.surf,seed:F.seed,tex:F.tex,tmode:F.tmode,mat:F.mat}:{sides:B.sides,surf:B.surf,seed:B.seed,tex:B.tex,tmode:B.tmode,mat:B.mat}),dim:lp(55,100,p.core)/100*((F.opq==null?100:F.opq)/100)*(1-.25*rest),detail:lp(B.detail||0,F.detail||0,p.core),rough:lp(B.rough||0,F.rough||0,p.core),sym:lp(B.sym==null?100:B.sym,F.sym==null?100:F.sym,p.core),grav:lp(B.grav==null?50:B.grav,F.grav==null?50:F.grav,p.orbits),tilt:lp(B.tilt==null?50:B.tilt,F.tilt==null?50:F.tilt,p.orbits),neb:lp(B.neb||0,F.neb||0,p.aura),c1:tc(mix(B.c1,F.c1,p.core)),c2:tc(mix(B.c2,F.c2,p.aura)),c3:tc(mix(B.c3,F.c3,p.particles)),size:lp(B.size,F.size,p.core),glow:lp(B.glow,F.glow,p.energy)*(1-.4*rest),vis:Object.assign({},B.vis,F.vis),aura:lp(B.aura,F.aura,p.aura),parts:lp(B.parts,F.parts,p.particles),pulse:gl('pulse',B.pulse,F.pulse,p.energy)*(1-.5*rest),corona:gl('corona',B.corona||0,F.corona||0,p.energy),speed:gl('speed',B.speed,F.speed,p.energy)*(1-.3*rest),trail:gl('trail',B.trail,F.trail,p.particles),rings:gl('rings',B.rings,F.rings,p.orbits),moons:gl('moons',B.moons,F.moons,p.orbits),agev:lv?Math.min(1,days/60):0,rest,hab:lv?habOf(s):[]}}
 function mk(name,type){const f=FIN();return{id:'s'+Date.now()+Math.floor(Math.random()*99),name,type,base:D(),bs:false,final:f,forms:[{n:'الشكل 1',d:f}],ti:0,started:false,gen:0,prog:{core:0,energy:0,aura:0,orbits:0,particles:0},tasks:[],day:{d:'',g:{}},log:[{d:today(),t:'وُلد النجم '+name}],born:today(),snaps:[]}}
-S.stars.forEach(s=>{if(!s.forms){s.forms=[{n:'الشكل 1',d:s.final}];s.ti=0;s.started=Object.values(s.prog).some(v=>v>0);s.bs=true;s.gen=0}if(s.ti>=s.forms.length)s.ti=0;s.forms.forEach(f=>{f.d=Object.assign(FIN(),f.d)});s.final=s.forms[s.ti].d});
+S.stars.forEach(s=>{s.name=cleanLabel(s.name||'STAR',48)||'STAR';if(Array.isArray(s.tasks))s.tasks.forEach(t=>{t.t=cleanLabel(t.t,120)});if(!s.forms){s.forms=[{n:'الشكل 1',d:s.final}];s.ti=0;s.started=Object.values(s.prog).some(v=>v>0);s.bs=true;s.gen=0}if(s.ti>=s.forms.length)s.ti=0;s.forms.forEach(f=>{f.d=Object.assign(FIN(),f.d)});s.final=s.forms[s.ti].d});
 function done(id,el){const s=cur(),t=s.tasks.find(k=>k.id===id);if(!t)return;
  if(!s.started){toast('ابدأ رحلة التطور من الاستوديو أولاً');return}
  if(t.once&&t.n>0||taskDates(t).includes(today())){toast('سُجلت هذه المهمة اليوم بالفعل');return}
@@ -3008,8 +3018,8 @@ function sfxEvolve(){if(!AUI()||!sfxOK())return;const s=cur(),t=AC.currentTime,r
 function sfxStart(){sfxEvolve()}
 function sfxLight(){if(!AUI()||!sfxOK())return;const t=AC.currentTime,r=rootOf(cur());[2,3,4].forEach((m,i)=>tone(r*m*2,'sine',t+i*.1,1.2,.08,{att:.05,send:1,pan:(i-1)*.4}))}
 function sfxShutter(){if(!AUI()||!sfxOK())return;const t=AC.currentTime;noise(t,.05,.2,{f:3000,q:2});noise(t+.07,.06,.15,{f:1800,q:2})}
-function uiTick(f,v){if(!AUI()||!sfxOK())return;tone(f||660,'sine',AC.currentTime,.07,v||.05,{lp:3000})}
-function uiPop(){if(!AUI()||!sfxOK())return;const t=AC.currentTime;tone(520,'sine',t,.09,.08,{fEnd:260});tone(1040,'sine',t,.05,.03)}
+function uiTick(f,v){if(!sfxOK()||!AUI())return;tone(f||660,'sine',AC.currentTime,.07,v||.05,{lp:3000})}
+function uiPop(){if(!sfxOK()||!AUI())return;const t=AC.currentTime;tone(520,'sine',t,.09,.08,{fEnd:260});tone(1040,'sine',t,.05,.03)}
 function uiToast(m){if(!AC||!sfxOK()||(m||'').charAt(0)=='+')return;const t=AC.currentTime;if(/مقفل|أولاً|بلغت|لا يوجد|تعذّر|غير صالح|الحد/.test(m||''))tone(160,'triangle',t,.18,.1,{fEnd:110,lp:500});else tone(740,'sine',t,.2,.05,{fEnd:520,send:.4})}
 function toggleMute(){S.mute=!S.mute;save();applyVol();if(S.mute)ambStop();else{AUI();ambStart()}render()}
 function setAmb(m){S.amb=m;S.audioComfortV12=true;save();AUI();if(m==='off')ambStop();else ambStart();render()}
@@ -3090,7 +3100,7 @@ function ambStart(){
 }
 function gest(){if(AC&&AC.state==='running'&&!ambOut&&S.amb&&S.amb!=='off'&&!S.mute)ambStart()}
 if(typeof document.addEventListener=='function'){
-document.addEventListener('pointerdown',e=>{AUI();gest();const t=e.target.closest&&e.target.closest('.chip,.btn,nav button,.ck');if(!t)return;const r=t.getBoundingClientRect(),d=Math.max(r.width,r.height)*2,sp=document.createElement('span');sp.className='rpl';sp.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';t.appendChild(sp);setTimeout(()=>sp.remove(),560)},true);
+document.addEventListener('pointerdown',e=>{gest();const t=e.target.closest&&e.target.closest('.chip,.btn,nav button,.ck');if(!t)return;const r=t.getBoundingClientRect(),d=Math.max(r.width,r.height)*2,sp=document.createElement('span');sp.className='rpl';sp.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';t.appendChild(sp);setTimeout(()=>sp.remove(),560)},true);
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('nav button,.chip,.btn');if(!t)return;if(t.closest('nav')){const i=[...t.parentNode.children].indexOf(t);uiTick([523,587,659,698,784,880][i%6],.06)}else if(t.classList.contains('btn'))uiPop();else uiTick(640,.045)},true);
 document.addEventListener('change',e=>{const t=e.target;if(t.type=='checkbox')uiTick(t.checked?740:520,.06)});
 document.addEventListener('input',e=>{const t=e.target,n=performance.now();if(t.type=='range'){if(n-lastSl<55)return;lastSl=n;const mn=+t.min||0,mx=(+t.max||100)-mn;uiTick(280+(+t.value-mn)/mx*700,.035)}else if(t.type=='color'){if(n-lastSl<90)return;lastSl=n;uiTick(500+Math.random()*500,.04)}});

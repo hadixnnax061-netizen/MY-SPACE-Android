@@ -22,16 +22,30 @@
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textColor="#E6F4F3"
+        android:textColor="#EDF5F8"
         android:textSize="15sp"
         android:textStyle="bold"
         android:text="AETHER" />
+
+    <ProgressBar
+        android:id="@+id/widget_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginTop="5dp"
+        android:max="100"
+        android:progress="0"
+        android:progressBackgroundTint="#293945"
+        android:progressTint="#62F1E6"
+        android:contentDescription="نسبة التقدم" />
 
     <TextView
         android:id="@+id/widget_pct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#36E7DC"
+        android:textColor="#62F1E6"
         android:textSize="13sp"
         android:text="0%" />
 </LinearLayout>

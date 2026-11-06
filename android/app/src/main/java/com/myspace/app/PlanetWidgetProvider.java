@@ -57,9 +57,9 @@ public final class PlanetWidgetProvider extends AppWidgetProvider {
     static RemoteViews build(Context context) {
         String name = "AETHER";
         int pct = 0;
-        String c1 = "#36e7dc";
-        String c2 = "#008080";
-        String c3 = "#e0b252";
+        String c1 = "#62f1e6";
+        String c2 = "#177f99";
+        String c3 = "#a58bff";
         try {
             SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             JSONObject object = new JSONObject(prefs.getString(DATA, "{}"));
@@ -76,6 +76,9 @@ public final class PlanetWidgetProvider extends AppWidgetProvider {
         views.setImageViewBitmap(R.id.widget_planet, renderPlanet(c1, c2, c3));
         views.setTextViewText(R.id.widget_name, name);
         views.setTextViewText(R.id.widget_pct, pct + "%");
+        views.setContentDescription(R.id.widget_planet,
+                name + "، التقدم " + pct + " بالمئة");
+        views.setProgressBar(R.id.widget_progress, 100, pct, false);
 
         Intent open = new Intent(context, MainActivity.class);
         open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -98,8 +101,6 @@ public final class PlanetWidgetProvider extends AppWidgetProvider {
         final int size = 420;
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.BLACK);
-
         float cx = size / 2f;
         float cy = size / 2f;
         float radius = size * 0.24f;
@@ -111,12 +112,12 @@ public final class PlanetWidgetProvider extends AppWidgetProvider {
 
         paint.setShader(null);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(size * 0.011f);
-        paint.setColor(withAlpha(c3, 155));
         canvas.save();
         canvas.rotate(-18f, cx, cy);
-        for (int i = 0; i < 2; i++) {
-            float ring = radius * (1.52f + i * 0.18f);
+        for (int i = 0; i < 3; i++) {
+            paint.setStrokeWidth(size * (i == 2 ? 0.006f : 0.01f));
+            paint.setColor(withAlpha(i == 1 ? c1 : c3, i == 0 ? 105 : 155));
+            float ring = radius * (1.48f + i * 0.18f);
             canvas.drawOval(cx - ring, cy - ring * 0.32f,
                     cx + ring, cy + ring * 0.32f, paint);
         }
@@ -136,6 +137,15 @@ public final class PlanetWidgetProvider extends AppWidgetProvider {
         canvas.drawCircle(cx, cy, radius, paint);
 
         paint.setShader(null);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(withAlpha(c1, 190));
+        float[][] stars = {{0.12f, 0.23f}, {0.84f, 0.19f}, {0.17f, 0.76f},
+                {0.82f, 0.79f}, {0.5f, 0.08f}, {0.91f, 0.53f}};
+        for (int i = 0; i < stars.length; i++) {
+            float sx = stars[i][0] * size, sy = stars[i][1] * size;
+            float sr = size * (i % 2 == 0 ? 0.006f : 0.004f);
+            canvas.drawCircle(sx, sy, sr, paint);
+        }
         paint.setColor(withAlpha(c3, 235));
         float starX = cx + radius * 1.62f;
         float starY = cy - radius * 1.5f;

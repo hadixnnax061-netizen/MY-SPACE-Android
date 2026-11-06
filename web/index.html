@@ -522,6 +522,74 @@ nav{background:#000!important;border-top:1px solid #1c1c1c!important;backdrop-fi
 .home-summary span{display:block;margin-top:3px;font-size:10px;color:var(--mu)}
 .hero-tools .clock{font-size:13px}
 @media(max-width:600px){.hero-canvas{aspect-ratio:4/5}}
+
+/* ===== MY SPACE · cosmic visual refresh ===== */
+:root{
+ --cy:#62f1e6;--te:#1597a1;--ne:#a58bff;--mu:#a0b6be;
+ --ln:#263743;--tx-2:#cbd9df;
+ --surface-1:#0b1119;--surface-2:#101925;--surface-3:#151e2b;
+ --edge-cyan:#62f1e64a;--edge-violet:#a58bff38;
+}
+body{background:#000!important;color:#edf5f8}
+main{scrollbar-color:#345260 transparent}
+main::-webkit-scrollbar-thumb{background:#345260}
+.card,.task-card,.task-form,.gemini-connection,.gemini-key-box,.texter-card,
+.texter-note,.texter-input,.sticky-preview,.widgets-intro,.widget-board,
+.quick-actions,.compare-tile,.timeline,.log-list,.hero-hint,.settings-block,
+.widget-editor,.widget-preview-frame,.wg,.soul-whisper,.soul-ritual,
+.thought-bubble,.cta-card,.achievement-tile,.note-card,.info-footnote,
+.insights-card,.day-note-card,.home-summary div{
+ background:linear-gradient(145deg,var(--surface-2),var(--surface-1) 68%,#070b11)!important;
+ background-color:var(--surface-1)!important;
+ border-color:#293945!important;
+ box-shadow:0 10px 26px #0009,inset 0 1px #ffffff0b!important;
+}
+.card:focus-within,.card:hover,.task-card:hover,.texter-card:focus-within{
+ border-color:#4a7280!important;box-shadow:0 12px 30px #000b,inset 0 1px #ffffff12!important
+}
+.hero-stage{
+ background:radial-gradient(ellipse at 50% 38%,#142a39 0%,#0b1521 42%,#05080e 78%,#000 100%)!important;
+ border-color:#62f1e633!important;
+ box-shadow:inset 0 0 64px #62f1e60b,0 20px 48px #000b!important;
+}
+.hero-stage::before{display:block!important;opacity:.8!important;background:radial-gradient(circle,#62f1e616,transparent 68%)!important}
+.hero-stage::after{display:block!important;background:linear-gradient(180deg,transparent 68%,#05080ed9)!important}
+.hero-orbit{border-color:#62f1e626!important;filter:drop-shadow(0 0 7px #62f1e612)}
+.orbit-b{border-color:#a58bff24!important}
+.hero-caption{color:#c7dbe2d9!important}
+.badge,.chip{border-color:#344854!important;color:#dce8ed}
+.chip{background:linear-gradient(180deg,#111d27,#0a1119)!important}
+.chip.on{color:var(--cy)!important;border-color:#62f1e68a!important;background:linear-gradient(135deg,#62f1e61b,#a58bff16)!important;box-shadow:0 0 18px #62f1e612,inset 0 0 16px #62f1e609!important}
+.btn:not(.g):not(.btn-quiet){background:linear-gradient(135deg,#78fff0,#39d4d0 58%,#38b7c6)!important;color:#041014!important;box-shadow:0 7px 20px #32d6ce2b,inset 0 1px #ffffff75!important}
+.btn.g,.btn-quiet{background:linear-gradient(145deg,#151f2b,#0b1119)!important;border:1px solid #344754!important;color:#e6f0f4!important}
+.btn:active,.chip:active,.icon-btn:active{filter:brightness(1.15)}
+nav{background:linear-gradient(180deg,#080d13,#000 84%)!important;border-top-color:#263743!important;backdrop-filter:blur(18px)}
+nav button{color:#9bafb8;min-height:54px;transition:color .2s ease,background .2s ease}
+nav button.on{color:var(--cy)!important;box-shadow:inset 0 2px 0 var(--cy),inset 0 20px 24px -24px #62f1e6!important;text-shadow:0 0 16px #62f1e64a!important}
+.home-summary div{border-color:#293945!important}
+.home-summary b,.insights-grid b{color:var(--cy)!important;text-shadow:0 0 18px #62f1e625}
+.insights-grid div{background:linear-gradient(145deg,#151f2a,#0b1118)!important;border-color:#31434f!important}
+.insight-bars i{background:linear-gradient(180deg,var(--cy),#287f91)!important}
+.gemini-message-label,.hint-kicker{color:var(--ne)!important}
+.gemini-key-box,.cta-card{border-color:var(--edge-cyan)!important}
+.task-card{border-inline-start-color:var(--task-accent)!important}
+.texter-input,.day-note-input,input[type=text],select,textarea{
+ background:#080e15!important;border-color:#344753!important;color:#edf5f8!important
+}
+.texter-input:focus,.day-note-input:focus,input[type=text]:focus,select:focus,textarea:focus{
+ border-color:#62f1e6!important;box-shadow:0 0 0 3px #62f1e61c,0 8px 24px #0008!important
+}
+.bar{background:#1a2b35!important}.bar i{background:linear-gradient(90deg,#35b9c8,#62f1e6)!important;box-shadow:0 0 10px #62f1e633}
+.ring-wrap{background:linear-gradient(145deg,#111c27,#080e15)!important;border-color:#293945!important}
+.compare-tile,.tl-item,.tex-tile{background:linear-gradient(145deg,#111b26,#080e15)!important;border-color:#293945!important}
+.toast{background:#111e29!important;border-color:#62f1e678!important;color:#edf5f8;box-shadow:0 12px 32px #000b,0 0 22px #62f1e618!important}
+.icon-btn{background:linear-gradient(145deg,#151f2a,#0a1017)!important;border-color:#354854!important;color:#edf5f8!important}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+ outline:2px solid #8afff3!important;outline-offset:3px!important
+}
+@media(max-width:380px){main{padding-inline:12px}.quick-actions{gap:6px}.home-summary{gap:6px}.home-summary div{padding-inline:3px}.hero-stage{margin-inline:-2px}}
+@media(min-width:700px){#app{max-width:720px}main{padding-inline:24px}.hero-stage{border-radius:30px}}
+@media(prefers-reduced-motion:reduce){.hero-stage::before,.hero-stage::after{animation:none!important}.card,.task-card,nav button,.bar i{transition:none!important}}
 </style></head><body>
 <canvas id="cosmos-sky" aria-hidden="true"></canvas>
 <div id="app"><main id="v"></main>
@@ -3127,4 +3195,3 @@ try{window.tint=()=>[0,0,0,0]}catch(_){}
 
 if('serviceWorker' in navigator && location.protocol!=='file:'){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 </script></body></html>
-

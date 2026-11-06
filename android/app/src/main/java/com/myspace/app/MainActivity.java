@@ -50,6 +50,7 @@ public final class MainActivity extends Activity {
     private static final String TAG = "MySpace";
     private static final String HOST = "appassets.androidplatform.net";
     private static final String START_URL = "https://" + HOST + "/assets/www/index.html";
+    static final String EXTRA_WIDGET_STAR_ID = "com.myspace.app.WIDGET_STAR_ID";
     private static final int REQUEST_FILE = 1001;
     private static final int REQUEST_SAVE = 1002;
     private static final int MAX_SAVE_BYTES = 8 * 1024 * 1024;
@@ -60,10 +61,12 @@ public final class MainActivity extends Activity {
     private GeminiBridge bridge;
     private ValueCallback<Uri[]> pendingFileCallback;
     private PendingSave pendingSave;
+    private String pendingWidgetStarId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        pendingWidgetStarId = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_WIDGET_STAR_ID);
 
         root = new FrameLayout(this);
         root.setBackgroundColor(getResources().getColor(R.color.space_bg));
@@ -107,6 +110,7 @@ public final class MainActivity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 Log.i(TAG, "MYSPACE_PAGE_FINISHED " + url);
                 sendNavInset();
+                focusWidgetBodyInPage();
                 view.postDelayed(() -> view.evaluateJavascript(
                         "(function(){try{"
                         + "var a=document.getElementById('app'),v=document.getElementById('v'),n=document.getElementById('nav');"
@@ -414,13 +418,30 @@ public final class MainActivity extends Activity {
                 ComponentName provider = new ComponentName(this, PlanetWidgetProvider.class);
                 if (manager.isRequestPinAppWidgetSupported()) {
                     manager.requestPinAppWidget(provider, null, null);
-                    toast("اختر «إضافة» لتثبيت ودجت الكوكب على الشاشة الرئيسية.");
+                    toast("اختر «إضافة» ثم عيّن الكوكب/النجم وساعته لكل ودجت.");
                     return;
                 }
             } catch (Exception ignored) {
             }
         }
-        toast("اضغط مطولاً على الشاشة الرئيسية ← الودجات ← «كوكب MY SPACE».");
+        toast("اضغط مطولاً على الشاشة الرئيسية ← الودجات ← «جرم MY SPACE».");
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        pendingWidgetStarId = intent == null ? null : intent.getStringExtra(EXTRA_WIDGET_STAR_ID);
+        focusWidgetBodyInPage();
+    }
+
+    private void focusWidgetBodyInPage() {
+        if (webView == null || pendingWidgetStarId == null || pendingWidgetStarId.isEmpty()) return;
+        String id = pendingWidgetStarId;
+        pendingWidgetStarId = null;
+        String script = "window.__myspaceOpenStar&&window.__myspaceOpenStar("
+                + org.json.JSONObject.quote(id) + ")";
+        webView.postDelayed(() -> webView.evaluateJavascript(script, null), 450);
     }
 
     public void openExternalUrl(String url) {

@@ -183,18 +183,61 @@ public final class GeminiBridge {
     @JavascriptInterface
     public void widgetData(String payload) {
         try {
+            if (payload == null || payload.length() > 512 * 1024) return;
             JSONObject input = new JSONObject(payload == null ? "{}" : payload);
             JSONObject clean = new JSONObject();
-            String name = input.optString("name", "MY SPACE");
-            if (name.length() > 60) name = name.substring(0, 60);
-            clean.put("name", name);
-            clean.put("pct", Math.max(0, Math.min(100, input.optInt("pct", 0))));
-            clean.put("stage", input.optString("stage", "").substring(0,
-                    Math.min(40, input.optString("stage", "").length())));
-            clean.put("c1", input.optString("c1", "#36e7dc"));
-            clean.put("c2", input.optString("c2", "#008080"));
-            clean.put("c3", input.optString("c3", "#e0b252"));
-            clean.put("shape", input.optString("shape", "sphere"));
+            JSONArray source = input.optJSONArray("stars");
+            JSONArray stars = new JSONArray();
+            if (source != null) {
+                for (int i = 0; i < Math.min(64, source.length()); i++) {
+                    JSONObject item = source.optJSONObject(i);
+                    if (item == null) continue;
+                    String id = item.optString("id", "");
+                    if (!id.matches("[A-Za-z0-9_-]{1,80}")) continue;
+                    JSONObject body = new JSONObject();
+                    String name = item.optString("name", "MY SPACE").replaceAll("[\\p{Cntrl}<>\\\"'`]+", "");
+                    if (name.length() > 60) name = name.substring(0, 60);
+                    body.put("id", id);
+                    body.put("name", name);
+                    body.put("kind", "star".equals(item.optString("kind", "planet")) ? "star" : "planet");
+                    String shape = item.optString("shape", "sphere");
+                    body.put("shape", shape.matches("[A-Za-z0-9_-]{1,32}") ? shape : "sphere");
+                    body.put("pct", Math.max(0, Math.min(100, item.optInt("pct", 0))));
+                    String stage = item.optString("stage", "");
+                    body.put("stage", stage.substring(0, Math.min(40, stage.length())));
+                    body.put("c1", PlanetWidgetProvider.safeColor(item.optString("c1", "#36e7dc"), "#36e7dc"));
+                    body.put("c2", PlanetWidgetProvider.safeColor(item.optString("c2", "#008080"), "#008080"));
+                    body.put("c3", PlanetWidgetProvider.safeColor(item.optString("c3", "#e0b252"), "#e0b252"));
+                    stars.put(body);
+                }
+            }
+            if (stars.length() == 0) {
+                JSONObject body = new JSONObject();
+                String id = input.optString("id", "AETHER");
+                if (!id.matches("[A-Za-z0-9_-]{1,80}")) id = "AETHER";
+                body.put("id", id);
+                String name = input.optString("name", "MY SPACE").replaceAll("[\\p{Cntrl}<>\\\"'`]+", "");
+                if (name.length() > 60) name = name.substring(0, 60);
+                body.put("name", name);
+                String shape = input.optString("shape", "sphere");
+                if (!shape.matches("[A-Za-z0-9_-]{1,32}")) shape = "sphere";
+                body.put("kind", "star".equals(shape) || "supernova".equals(shape)
+                        || "pulsar".equals(shape) || "binary".equals(shape) ? "star" : "planet");
+                body.put("shape", shape);
+                body.put("pct", Math.max(0, Math.min(100, input.optInt("pct", 0))));
+                String stage = input.optString("stage", "");
+                body.put("stage", stage.substring(0, Math.min(40, stage.length())));
+                body.put("c1", PlanetWidgetProvider.safeColor(input.optString("c1", "#36e7dc"), "#36e7dc"));
+                body.put("c2", PlanetWidgetProvider.safeColor(input.optString("c2", "#008080"), "#008080"));
+                body.put("c3", PlanetWidgetProvider.safeColor(input.optString("c3", "#e0b252"), "#e0b252"));
+                stars.put(body);
+            }
+            String defaultId = input.optString("defaultId", "");
+            if (defaultId.length() > 80 || !defaultId.matches("[A-Za-z0-9_-]{1,80}")) {
+                defaultId = stars.optJSONObject(0).optString("id", "AETHER");
+            }
+            clean.put("defaultId", defaultId);
+            clean.put("stars", stars);
             PlanetWidgetProvider.store(activity, clean.toString());
         } catch (Exception ignored) {
         }

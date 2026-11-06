@@ -172,8 +172,8 @@ cp android/keystore.properties.example android/keystore.properties
 
 الملف `.github/workflows/android.yml` يعمل عند:
 
-- `push` إلى `main` → يبني APK ويحدّث إصدار **latest** في Releases ويضيف Artifact.
-- وسم `v*` → ينشئ Release مرقّماً مع ملاحظات الإصدار.
+- `push` إلى `main` → يبني APK ويرفع Artifacts؛ ينشر **latest** فقط عند إعداد مفتاح توقيع ثابت.
+- وسم `v*` → ينشئ Release مرقّماً فقط عند إعداد مفتاح توقيع ثابت.
 - `pull_request` → يبني ويتحقق فقط.
 - `workflow_dispatch` → بناء يدوي.
 
@@ -188,7 +188,7 @@ cp android/keystore.properties.example android/keystore.properties
 | `MYSPACE_KEY_ALIAS` | `myspace` |
 | `MYSPACE_KEY_PASSWORD` | كلمة مرور المفتاح |
 
-إذا لم تُضف الأسرار، يبقى البناء ناجحاً ويُوقَّع APK بمفتاح debug **مؤقت**، ما يعني أن التحديثات اللاحقة قد تتطلب إزالة النسخة السابقة أولاً.
+إذا لم تُضف الأسرار، يبقى البناء ناجحاً وتبقى ملفات APK متاحة كـArtifacts للتجربة، لكن نسخة `release` تكون موقّعة بمفتاح debug **مؤقت**، ولا تُنشر تلقائياً في Releases. لا توزّع هذه النسخة كمحدّث رسمي؛ فالانتقال إلى توقيع ثابت لاحقاً قد يتطلب إزالة النسخة السابقة. أضف أسرار توقيع دائمة قبل نشر APK قابل للتحديث.
 
 ---
 

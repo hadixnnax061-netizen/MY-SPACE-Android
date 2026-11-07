@@ -3188,17 +3188,12 @@ function treeAfter(){document.querySelectorAll('.mc3').forEach(c=>attach(c,()=>c
 
 /* ===== v5: procedural sound engine (no files): per-shape voices, ocean/space ambience, UI sounds ===== */
 let AC=null,MB=null,SB=null,AB=null,RV=null,RV2=null,NB=null,BR=null,ambGen=0,ambNodes=[],ambT=[],ambOut=null,lastSl=0,lastSw=0;
-let AUDIO_ANALYSER=null,AUDIO_DATA=null,AUDIO_BASS=0,AUDIO_MID=0;
+let AUDIO_ANALYSER=null,AUDIO_DATA=null,AUDIO_BASS=0,AUDIO_MID=0,AUDIO_VOICES=0;
 const SNDN={sphere:'جرس دافئ',crystal:'رنين بلوري',geo:'نبضات رقمية',star:'تلألؤ',spiral:'اكتساح دوّامي',hole:'نبض عميق',flower:'عزف ناعم',liquid:'قطرات ماء',jelly:'نداء الأعماق',string:'عزف أوتار',mosaic:'نقرات متناثرة',frag:'شظايا زجاج',binary:'نغمتان متجاورتان',gear:'تكّات ميكانيكية',image:'صوت هادئ',comet:'صفير مذنّب',ringed:'رنين حلقي',eclipse:'همس الكسوف',pulsar:'نبض منارة',nebula:'همهمة سديم',supernova:'انفجار بعيد',aurora:'همس شفقي',lava:'هدير بركاني',eye:'نبض العين',clock:'تكّة زمن',tree:'حفيف أوراق',hourglass:'همس الرمال'};
-function irBuf(){const len=Math.floor(AC.sampleRate*3),b=AC.createBuffer(2,len,AC.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2)}return b}
 function AUI(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}
-  const comp=AC.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=6;MB=AC.createGain();AB=AC.createGain();SB=AC.createGain();
-  RV=AC.createConvolver();RV.buffer=irBuf();const w1=AC.createGain();w1.gain.value=.55;RV.connect(w1);w1.connect(SB);
-  RV2=AC.createConvolver();RV2.buffer=irBuf();const w2=AC.createGain();w2.gain.value=.8;RV2.connect(w2);w2.connect(AB);
-  SB.connect(MB);AB.connect(MB);MB.connect(comp);AUDIO_ANALYSER=AC.createAnalyser();AUDIO_ANALYSER.fftSize=64;AUDIO_ANALYSER.smoothingTimeConstant=.76;AUDIO_DATA=new Uint8Array(AUDIO_ANALYSER.frequencyBinCount);comp.connect(AUDIO_ANALYSER);AUDIO_ANALYSER.connect(AC.destination);
-  NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);{const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
-  BR=AC.createBuffer(1,AC.sampleRate*4,AC.sampleRate);{const d=BR.getChannelData(0);let l=0;for(let i=0;i<d.length;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.5}}
-  applyVol()}
+  const comp=AC.createDynamicsCompressor();comp.threshold.value=-12;comp.knee.value=18;comp.ratio.value=4;comp.attack.value=.008;comp.release.value=.18;MB=AC.createGain();AB=AC.createGain();SB=AC.createGain();
+  RV=AC.createGain();RV.gain.value=.08;RV.connect(SB);RV2=AC.createGain();RV2.gain.value=.06;RV2.connect(AB);
+  SB.connect(MB);AB.connect(MB);MB.connect(comp);AUDIO_ANALYSER=AC.createAnalyser();AUDIO_ANALYSER.fftSize=64;AUDIO_ANALYSER.smoothingTimeConstant=.76;AUDIO_DATA=new Uint8Array(AUDIO_ANALYSER.frequencyBinCount);comp.connect(AUDIO_ANALYSER);AUDIO_ANALYSER.connect(AC.destination);applyVol()}
  if(AC.state==='suspended'){
   try{const resumed=AC.resume();if(resumed&&typeof resumed.then==='function')resumed.then(()=>{if(!ambOut&&S.amb&&S.amb!=='off'&&!S.mute&&typeof ambStart==='function')ambStart()}).catch(()=>{})}catch(e){}
  }
@@ -3211,26 +3206,22 @@ function updateAudioLevels(){
  bass/=3*255;mid/=11*255;AUDIO_BASS+=(bass-AUDIO_BASS)*.2;AUDIO_MID+=(mid-AUDIO_MID)*.16;
 }
 const sfxOK=()=>S.snd!==false&&!S.mute;
-function tone(f,type,t0,dur,vol,o={}){const A=AC;if(!A||(!o.amb&&!sfxOK()))return;const osc=A.createOscillator(),g=A.createGain();osc.type=type;osc.frequency.setValueAtTime(f,t0);
+function tone(f,type,t0,dur,vol,o={}){const A=AC;if(!A||(!o.amb&&!sfxOK())||AUDIO_VOICES>=48)return;AUDIO_VOICES++;const nodes=[],osc=A.createOscillator(),g=A.createGain();nodes.push(osc,g);osc.type=type;osc.frequency.setValueAtTime(f,t0);
  if(o.fEnd)osc.frequency.exponentialRampToValueAtTime(Math.max(20,o.fEnd),t0+(o.fT||dur));if(o.ramps)o.ramps.forEach(r=>osc.frequency.exponentialRampToValueAtTime(Math.max(20,r[1]),t0+r[0]));if(o.det)osc.detune.value=o.det;
- if(o.vib){const l=A.createOscillator(),lg=A.createGain();l.frequency.value=o.vib[0];lg.gain.value=o.vib[1];l.connect(lg);lg.connect(osc.frequency);l.start(t0);l.stop(t0+dur+.05)}
+ if(o.vib){const l=A.createOscillator(),lg=A.createGain();nodes.push(l,lg);l.frequency.value=o.vib[0];lg.gain.value=o.vib[1];l.connect(lg);lg.connect(osc.frequency);l.start(t0);l.stop(t0+dur+.05)}
  g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(vol,t0+(o.att||.005));g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
- let n=osc;if(o.lp){const fl=A.createBiquadFilter();fl.type='lowpass';fl.frequency.value=o.lp;osc.connect(fl);n=fl}n.connect(g);
- let out=g;if(o.pan!=null&&A.createStereoPanner){const pn=A.createStereoPanner();pn.pan.value=Math.max(-1,Math.min(1,o.pan));g.connect(pn);out=pn}
- out.connect(o.bus||SB);if(o.send){const sg=A.createGain();sg.gain.value=o.send;out.connect(sg);sg.connect(o.rv||RV)}
- osc.start(t0);osc.stop(t0+dur+.05);return osc}
-function noise(t0,dur,vol,o={}){const A=AC;if(!A||(!o.amb&&!sfxOK()))return;const s=A.createBufferSource();s.buffer=o.brown?BR:NB;s.loop=true;const fl=A.createBiquadFilter();fl.type=o.type||'bandpass';fl.frequency.setValueAtTime(o.f||1000,t0);
- if(o.fEnd)fl.frequency.exponentialRampToValueAtTime(o.fEnd,t0+dur);fl.Q.value=o.q||1;const g=A.createGain();g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(vol,t0+(o.att||.005));g.gain.exponentialRampToValueAtTime(.0001,t0+dur);s.connect(fl);fl.connect(g);
- let out=g;if(o.pan!=null&&A.createStereoPanner){const pn=A.createStereoPanner();pn.pan.value=Math.max(-1,Math.min(1,o.pan));g.connect(pn);out=pn}
- out.connect(o.bus||SB);if(o.send){const sg=A.createGain();sg.gain.value=o.send;out.connect(sg);sg.connect(o.rv||RV)}
- s.start(t0,Math.random()*.5);s.stop(t0+dur+.05)}
+ let n=osc;if(o.lp){const fl=A.createBiquadFilter();nodes.push(fl);fl.type='lowpass';fl.frequency.value=o.lp;osc.connect(fl);n=fl}n.connect(g);
+ let out=g;if(o.pan!=null&&A.createStereoPanner){const pn=A.createStereoPanner();nodes.push(pn);pn.pan.value=Math.max(-1,Math.min(1,o.pan));g.connect(pn);out=pn}
+ out.connect(o.bus||SB);if(o.send){const sg=A.createGain();nodes.push(sg);sg.gain.value=o.send;out.connect(sg);sg.connect(o.rv||RV)}
+ osc.onended=()=>{AUDIO_VOICES=Math.max(0,AUDIO_VOICES-1);nodes.forEach(n=>{try{n.disconnect()}catch(e){}})};osc.start(t0);osc.stop(t0+dur+.05);return osc}
+function noise(){/* Broadband noise removed: it caused harsh hiss on phone speakers. */return null}
 function fm(fc,t,dur,vol,pan){const A=AC,c=A.createOscillator(),m=A.createOscillator(),mg=A.createGain(),g=A.createGain();c.frequency.value=fc;m.frequency.value=fc*3.5;mg.gain.setValueAtTime(fc*2.2,t);mg.gain.exponentialRampToValueAtTime(fc*.05,t+dur);m.connect(mg);mg.connect(c.frequency);
  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);c.connect(g);let o=g;if(A.createStereoPanner){const pn=A.createStereoPanner();pn.pan.value=Math.max(-1,Math.min(1,pan||0));g.connect(pn);o=pn}
  o.connect(SB);const sg=A.createGain();sg.gain.value=.6;o.connect(sg);sg.connect(RV);c.start(t);m.start(t);c.stop(t+dur+.05);m.stop(t+dur+.05)}
 const rootOf=s=>[130.8,146.8,164.8,174.6,196,220,246.9][hash(s.name||'')%7];
 const scOf=s=>(hash((s.name||'')+'x')&1)?[0,3,5,7,10]:[0,2,4,7,9];
 const nf=(root,deg,oct,sc)=>root*Math.pow(2,(sc[((deg%5)+5)%5]+12*Math.floor(deg/5)+12*(oct||0))/12);
-function tapSfx(nx,ny,P){if(!AUI()||!sfxOK())return;const s=cur();P=P||eff(s);nx=nx==null?.5:nx;ny=ny==null?.5:ny;voice(P.shape||s.final.shape,P.mat||'plain',nx,ny,P,s)}
+let lastPlanetSoundAt=0;function tapSfx(nx,ny,P){const now=performance.now();if(now-lastPlanetSoundAt<220||!AUI()||!sfxOK())return;lastPlanetSoundAt=now;const s=cur();P=P||eff(s);nx=nx==null?.5:nx;ny=ny==null?.5:ny;voice(P.shape||s.final.shape,P.mat||'plain',nx,ny,P,s)}
 function chime(x,y,P){tapSfx(x,y,P)}
 function voice(sh,mat,nx,ny,P,s){const A=AC,t=A.currentTime+.005,root=rootOf(s),sc=scOf(s),deg=Math.round((1-ny)*7)+(s.tasks.length%3),f=nf(root,deg,0,sc),pan=(nx-.5)*1.6,br=.45+.55*Math.min(1,(P.glow==null?50:P.glow)/100);
  switch(sh){
@@ -3262,19 +3253,19 @@ function voice(sh,mat,nx,ny,P,s){const A=AC,t=A.currentTime+.005,root=rootOf(s),
   case 'hourglass':for(let i=0;i<8;i++)noise(t+i*.08,.03,.035,{f:6000,q:2,type:'highpass',pan:Math.random()*2-1});tone(f*2,'sine',t,1.2,.055,{att:.1,send:.7});break;
   default:tone(f,'sine',t,1.2,.14,{att:.05,send:.5,pan});tone(f*1.01,'triangle',t,1.2,.06,{att:.05,send:.5,pan})}
  matSfx(mat,t,f,pan)}
-function matSfx(m,t,f,pan){if(m=='glass')tone(f*4,'sine',t,.6,.05,{send:.8,pan});else if(m=='metal'){tone(f*2.76,'triangle',t,.5,.05,{send:.5,pan});tone(f*5.4,'triangle',t,.35,.03,{pan})}else if(m=='gas')noise(t,.7,.06,{f:700,q:.7,att:.2,send:.6,pan});else if(m=='sand'){for(let i=0;i<10;i++)noise(t+i*.045,.03,.05,{f:5000,q:1.5,type:'highpass',pan})}else if(m=='digital'){for(let i=0;i<3;i++)tone(f*(2+i*.5),'square',t+i*.04,.05,.03,{lp:2500,pan})}}
+function matSfx(m,t,f,pan){if(m=='glass')tone(f*4,'sine',t,.6,.035,{send:.22,pan});else if(m=='metal'){tone(f*2.76,'triangle',t,.5,.04,{send:.18,pan});tone(f*5.4,'triangle',t,.35,.025,{pan})}else if(m=='gas')tone(f*.72,'sine',t,.48,.035,{fEnd:f*.62,lp:700,pan});else if(m=='sand'){for(let i=0;i<4;i++)tone(f*(2.1+i*.12),'sine',t+i*.045,.07,.018,{fEnd:f*(1.8+i*.1),pan})}else if(m=='digital'){for(let i=0;i<3;i++)tone(f*(2+i*.5),'square',t+i*.04,.05,.03,{lp:2500,pan})}}
 function holdSfx(){if(!AUI()||!sfxOK())return;const t=AC.currentTime;tone(55,'sine',t,2,.3,{att:.5,fEnd:70});noise(t,1.5,.12,{brown:1,type:'lowpass',f:200,fEnd:900,att:.8,send:.4});tone(rootOf(cur()),'sine',t+.2,1.8,.08,{att:.6,send:.9})}
 function spinSfx(){if(!AUI()||!sfxOK())return;const t=AC.currentTime,r=rootOf(cur());noise(t,.9,.1,{f:400,fEnd:4000,q:1,att:.05,send:.4});tone(r*2,'sawtooth',t,.8,.04,{fEnd:r*4,lp:1200,att:.05,send:.5})}
 function hapticsOn(){return S.haptics!==false}
 function haptic(p){if(!hapticsOn())return;try{if(navigator.vibrate)navigator.vibrate(p)}catch(_){}}
-function pressSfx(nx,ny){if(!AUI()||!sfxOK())return;const t=AC.currentTime;noise(t,.035,.016,{f:1100,q:1.3,pan:(nx-.5)*1.2});tone(135,'sine',t,.09,.03,{fEnd:88})}
-function releaseSfx(){if(!AUI()||!sfxOK())return;const t=AC.currentTime,r=rootOf(cur());tone(r*2,'sine',t,1.2,.065,{att:.02,fEnd:r*3,send:.7});noise(t,.5,.03,{f:1800,q:1.2,att:.12,send:.5})}
-function swipeSfx(dx){const n=performance.now();if(n-lastSw<90||!AUI()||!sfxOK())return;lastSw=n;const a=Math.min(1,Math.abs(dx)/18);noise(AC.currentTime,.14,.05*a+.0002,{f:500+a*1800,q:1.5,att:.02,pan:Math.sign(dx)*.6})}
+function pressSfx(nx,ny){if(!AUI()||!sfxOK())return;const t=AC.currentTime;tone(220,'sine',t,.045,.012,{fEnd:185})}
+function releaseSfx(){if(!AUI()||!sfxOK())return;const t=AC.currentTime,r=rootOf(cur());tone(r*2,'sine',t,.42,.028,{att:.02,fEnd:r*2.3})}
+function swipeSfx(){/* Gesture movement is intentionally silent to prevent audio-node churn. */}
 function sfxTask(attr){if(!AUI()||!sfxOK())return;const s=cur(),t=AC.currentTime,i=Math.max(0,AO.indexOf(attr)),f=nf(rootOf(s),i+2,1,scOf(s));tone(f,'sine',t,.5,.16,{send:.5});tone(f*1.5,'triangle',t+.08,.6,.12,{send:.6});tone(f*2,'sine',t+.16,.8,.09,{send:.8});tone(200,'sine',t,.12,.12,{fEnd:90})}
 function sfxEvolve(){if(!AUI()||!sfxOK())return;const s=cur(),t=AC.currentTime,r=rootOf(s);tone(58,'sine',t,2.4,.4,{att:.02,fEnd:30});noise(t,1.4,.18,{f:200,fEnd:5000,q:.9,att:1.1,send:.6});[1,1.25,1.5,2,2.5].forEach((m,i)=>tone(r*m*2,i%2?'triangle':'sine',t+.5+i*.09,3,.09,{att:.5,send:.9,pan:(i-2)*.3}));for(let i=0;i<9;i++)tone(r*[8,10,12,15,16][i%5]*(1+i*.01),'sine',t+.6+i*.2,1.2,.04,{send:1,pan:Math.random()*2-1})}
 function sfxStart(){sfxEvolve()}
 function sfxLight(){if(!AUI()||!sfxOK())return;const t=AC.currentTime,r=rootOf(cur());[2,3,4].forEach((m,i)=>tone(r*m*2,'sine',t+i*.1,1.2,.08,{att:.05,send:1,pan:(i-1)*.4}))}
-function sfxShutter(){if(!AUI()||!sfxOK())return;const t=AC.currentTime;noise(t,.05,.2,{f:3000,q:2});noise(t+.07,.06,.15,{f:1800,q:2})}
+function sfxShutter(){if(!sfxOK()||!AUI())return;const t=AC.currentTime;tone(880,'sine',t,.055,.055,{fEnd:620});tone(1320,'sine',t+.035,.075,.025,{fEnd:990})}
 function uiTick(f,v){if(!sfxOK()||!AUI())return;tone(f||660,'sine',AC.currentTime,.07,v||.05,{lp:3000})}
 function uiPop(){if(!sfxOK()||!AUI())return;const t=AC.currentTime;tone(520,'sine',t,.09,.08,{fEnd:260});tone(1040,'sine',t,.05,.03)}
 function uiToast(m){if(!AC||!sfxOK()||(m||'').charAt(0)=='+')return;const t=AC.currentTime;if(/مقفل|أولاً|بلغت|لا يوجد|تعذّر|غير صالح|الحد/.test(m||''))tone(160,'triangle',t,.18,.1,{fEnd:110,lp:500});else tone(740,'sine',t,.2,.05,{fEnd:520,send:.4})}
@@ -3283,78 +3274,21 @@ function setAmb(m){S.amb=m;S.audioComfortV12=true;save();AUI();if(m==='off')ambS
 function previewAmb(){if(S.amb==='off'){toast('اختر بيئة صوتية أولاً');return}AUI();ambStart();toast('يُعاد تشغيل البيئة الصوتية المحددة')}
 
 const AMB_LIST=[
- ['ocean','🌊','محيط'],['space','🌌','فضاء'],['rain','🌧️','مطر'],['storm','⛈️','عاصفة'],
- ['forest','🌲','غابة'],['night','🌙','ليل'],['fire','🔥','نار'],['wind','💨','ريح'],
- ['river','🏞️','نهر'],['cave','🕳️','كهف'],['birds','🐦','عصافير'],['whale','🐋','حوت'],
- ['bells','🔔','أجراس'],['piano','🎹','بيانو'],['heart','💓','نبض قلب'],['drone','🕉️','طنين'],
- ['temple','🏛️','معبد'],['underwater','🐠','تحت الماء'],['snow','❄️','ثلج'],['fireflies','✨','يراعات']
+ ['ocean','🌊','موجات هادئة'],['space','🌌','فضاء ناعم'],['night','🌙','ليل هادئ'],['piano','🎹','نغمات مفاتيح']
 ];
 
 function sndPanel(){const s=cur(),P=eff(s),av=S.av==null?32:S.av,sv=S.sv==null?42:S.sv,am=S.amb||'off';
- return`<h2>الصوت</h2><div class="card"><div class="row sp"><b>الصوت الرئيسي</b><label class="mu"><input type="checkbox" ${S.mute?'checked':''} onchange="S.mute=this.checked;save();applyVol();if(S.mute)ambStop();else{AUI();ambStart()}"> كتم الكل</label></div><div class="row sp" style="margin-top:8px"><b>مؤثرات النجم والواجهة</b><label class="mu"><input type="checkbox" ${S.snd!==false?'checked':''} onchange="S.snd=this.checked;save();applyVol()"> تشغيل</label></div><div class="sl"><div class="row sp"><span>مستوى المؤثرات</span><span class="mu" id="svl">${sv}%</span></div><input type="range" min="0" max="100" value="${sv}" oninput="S.sv=+this.value;save();applyVol();$('#svl').textContent=this.value+'%'"></div><div class="mu">صوت نجمك الآن: ${SNDN[P.shape]||'—'}. لكل شكل ومادة صوتها، ونغمة كل نجم تتبع اسمه.</div><div class="row" style="margin-top:8px"><button class="chip" onclick="tapSfx(.5,.35)">🔊 جرّب صوت نجمك</button></div><b style="display:block;margin-top:14px">الصوت الخلفي (متوقف تلقائيًا)</b><div class="amb-grid" style="margin:8px 0">${AMB_LIST.map(a=>`<button class="chip ${am==a[0]?'on':''}" onclick="setAmb('${a[0]}')">${a[1]} ${a[2]}</button>`).join('')}<button class="chip ${am=='off'?'on':''}" onclick="setAmb('off')">🔇 صامت</button></div><div class="mu" style="font-size:10px;margin:-4px 0 8px">لن تعمل البيئة الصوتية تلقائيًا؛ اختر صوتًا يدويًا فقط إذا رغبت.</div><div class="row" style="margin:6px 0 10px"><button class="chip" onclick="previewAmb()">▶ جرّب / أعد تشغيل الصوت المحدد</button><span class="mu" style="font-size:10px">أصوات مولّدة داخل التطبيق؛ المس مرة لفتح الصوت في المتصفح</span></div>${usrSnd()}<div class="sl"><div class="row sp"><span>مستوى الخلفية</span><span class="mu" id="avl">${av}%</span></div><input type="range" min="0" max="100" value="${av}" oninput="S.av=+this.value;save();applyVol();$('#avl').textContent=this.value+'%'"></div></div>`}
+ return`<h2>الصوت</h2><div class="card"><div class="row sp"><b>الصوت الرئيسي</b><label class="mu"><input type="checkbox" ${S.mute?'checked':''} onchange="S.mute=this.checked;save();applyVol();if(S.mute)ambStop();else{AUI();ambStart()}"> كتم الكل</label></div><div class="row sp" style="margin-top:8px"><b>مؤثرات النجم والواجهة</b><label class="mu"><input type="checkbox" ${S.snd!==false?'checked':''} onchange="S.snd=this.checked;save();applyVol()"> تشغيل</label></div><div class="sl"><div class="row sp"><span>مستوى المؤثرات</span><span class="mu" id="svl">${sv}%</span></div><input type="range" min="0" max="100" value="${sv}" oninput="S.sv=+this.value;save();applyVol();$('#svl').textContent=this.value+'%'"></div><div class="mu">صوت نجمك الآن: ${SNDN[P.shape]||'—'}. لكل شكل ومادة نغمة ناعمة، ونغمة كل نجم تتبع اسمه.</div><div class="row" style="margin-top:8px"><button class="chip" onclick="tapSfx(.5,.35)">🔊 جرّب صوت نجمك</button></div><b style="display:block;margin-top:14px">طبقة نغمية هادئة (اختيارية)</b><div class="amb-grid" style="margin:8px 0">${AMB_LIST.map(a=>`<button class="chip ${am==a[0]?'on':''}" onclick="setAmb('${a[0]}')">${a[1]} ${a[2]}</button>`).join('')}<button class="chip ${am=='off'?'on':''}" onclick="setAmb('off')">🔇 صامت</button></div><div class="mu" style="font-size:10px;margin:-4px 0 8px">الخلفية صامتة تلقائيًا. النغمات الجديدة خالية من الضوضاء البيضاء والصدى الاصطناعي.</div><div class="row" style="margin:6px 0 10px"><button class="chip" onclick="previewAmb()">▶ جرّب / أعد تشغيل النغمة</button><span class="mu" style="font-size:10px">نغمات مولّدة داخل التطبيق؛ تُفعّل فقط باختيارك</span></div>${usrSnd()}<div class="sl"><div class="row sp"><span>مستوى الخلفية</span><span class="mu" id="avl">${av}%</span></div><input type="range" min="0" max="100" value="${av}" oninput="S.av=+this.value;save();applyVol();$('#avl').textContent=this.value+'%'"></div></div>`}
 /* ambience */
 function ambStop(){ambGen++;ambT.forEach(clearTimeout);ambT=[];if(AC&&ambOut){const o=ambOut,nodes=ambNodes;try{o.gain.cancelScheduledValues(AC.currentTime);o.gain.setTargetAtTime(0,AC.currentTime,.25)}catch(e){}setTimeout(()=>nodes.forEach(n=>{try{n.stop()}catch(e){}}),1600)}ambNodes=[];ambOut=null}
 function ambStart(){
  ambStop();const mode=S.amb||'off';if(mode==='off'||S.mute||!AUI())return;
- const A=AC,gen=ambGen,s=cur(),root=rootOf(s)/4,out=A.createGain();out.gain.value=.0001;out.gain.linearRampToValueAtTime(.72,A.currentTime+2.4);out.connect(AB);ambOut=out;
- const osc=(f,type,v,lp,lfoR,lfoD)=>{const o=A.createOscillator(),g=A.createGain(),fl=A.createBiquadFilter();o.type=type;o.frequency.value=Math.max(20,f);g.gain.value=Math.min(.28,v*1.25);fl.type='lowpass';fl.frequency.value=lp||900;o.connect(fl);fl.connect(g);g.connect(out);const rvGain=A.createGain();rvGain.gain.value=.42;g.connect(rvGain);rvGain.connect(RV2);if(lfoR){const l=A.createOscillator(),lg=A.createGain();l.frequency.value=lfoR;lg.gain.value=lfoD;l.connect(lg);lg.connect(g.gain);l.start();ambNodes.push(l)}o.start();ambNodes.push(o)};
- const src=(buf,type,f,q,gain,lfoR,lfoD)=>{if(!buf)return;const sr=A.createBufferSource();sr.buffer=buf;sr.loop=true;const fl=A.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q||.7;const g=A.createGain();g.gain.value=Math.min(.42,gain*1.1);sr.connect(fl);fl.connect(g);g.connect(out);if(lfoR){const l=A.createOscillator(),lg=A.createGain();l.frequency.value=lfoR;lg.gain.value=lfoD;l.connect(lg);lg.connect(fl.frequency);l.start();ambNodes.push(l)}sr.start();ambNodes.push(sr)};
- const later=(fn,a,b)=>{let id;id=setTimeout(()=>{ambT=ambT.filter(q=>q!==id);if(gen!==ambGen)return;try{fn()}catch(e){}if(gen===ambGen)later(fn,a,b)},(a+Math.random()*(b-a))*1000);ambT.push(id)};
- const AT={amb:true,bus:AB,rv:RV2},toneAt=(f,type,dur,vol,opts={})=>tone(f,type,A.currentTime+.018,dur,Math.min(.12,vol*1.35),{...AT,...opts}),noiseAt=(dur,vol,opts={})=>noise(A.currentTime+.018,dur,Math.min(.12,vol*1.15),{...AT,...opts});
- if(mode==='u1'||mode==='u2'){const ub=getUB(mode);if(ub){const sr=A.createBufferSource();sr.buffer=ub;sr.loop=true;sr.connect(out);sr.start();ambNodes.push(sr)}else toast('أضف صوتاً أولاً من قسم الصوت');return}
- const builders={
-  ocean:()=>{src(BR,'lowpass',190,.7,.38,.05,65);osc(root*2,'sine',.075,420,.035,.025);osc(root*3,'sine',.045,520,.026,.02);later(()=>{const f=rootOf(cur())*[1.2,1.5,1.8][Math.floor(Math.random()*3)];toneAt(f,'sine',4,.045,{att:.9,fEnd:f*.82,vib:[4,f*.025],send:.8,pan:Math.random()*1.2-.6})},12,25);later(()=>noiseAt(.16,.025,{f:1700,fEnd:750,q:1.4}),1,3)},
-  space:()=>{osc(root,'sine',.055,260,.028,.02);osc(root*1.5,'triangle',.035,480,.025,.018);osc(root*2.01,'sine',.035,760,.018,.015);src(NB,'bandpass',2600,.6,.012,.035,850);later(()=>toneAt(rootOf(cur())*[8,10,12,15][Math.floor(Math.random()*4)],'sine',2.8,.022,{att:.02,send:1,pan:Math.random()*1.6-.8}),2.5,8)},
-  rain:()=>{src(BR,'lowpass',280,.7,.34,.04,55);src(NB,'highpass',3300,.6,.025,.08,900);later(()=>noiseAt(.2,.035,{f:1800+Math.random()*1800,fEnd:900,q:1.5,pan:Math.random()*1.8-.9}),.25,1.1);osc(root*2,'sine',.03,520,.025,.02)},
-  storm:()=>{src(BR,'bandpass',380,.55,.4,.13,230);src(NB,'lowpass',780,.6,.045,.05,230);osc(root*.7,'sine',.04,220,.04,.025);later(()=>{const t=A.currentTime;tone(42,'sine',t,2.8,.23,{...AT,att:.04,fEnd:25});noise(t,2.3,.12,{...AT,brown:1,type:'lowpass',f:100,fEnd:350,att:.35})},7,16)},
-  forest:()=>{src(BR,'lowpass',420,.6,.19,.05,95);src(NB,'bandpass',1900,.7,.022,.07,450);osc(root*2,'sine',.035,550,.03,.02);later(()=>{const f=root*[6,8,10][Math.floor(Math.random()*3)],t=A.currentTime;tone(f,'sine',t,.16,.026,{...AT,fEnd:f*1.24,att:.01,pan:Math.random()*2-1});tone(f*1.5,'sine',t+.12,.1,.017,{...AT,pan:Math.random()*2-1})},1.5,4.5)},
-  night:()=>{src(BR,'lowpass',260,.6,.12,.035,60);osc(root,'sine',.035,360,.03,.02);later(()=>{const t=A.currentTime;for(let i=0;i<3;i++)tone(3300+Math.random()*900,'sine',t+i*.11,.045,.012,{...AT,att:.004,pan:Math.random()*2-1})},.7,2.5);later(()=>toneAt(root*2,'sine',1.4,.025,{att:.12,fEnd:root*1.8,send:.7}),8,18)},
-  fire:()=>{src(BR,'bandpass',410,.8,.25,.06,100);src(NB,'lowpass',900,.6,.018,.06,260);later(()=>noiseAt(.07,.045,{f:2400+Math.random()*1800,fEnd:1000,q:.8,att:.002,pan:Math.random()*2-1}),.25,1.5);later(()=>toneAt(root*[2,3,4][Math.floor(Math.random()*3)],'triangle',.55,.018,{att:.08,fEnd:root*1.7,send:.5}),3,7)},
-  wind:()=>{src(BR,'bandpass',480,.55,.3,.12,240);src(NB,'lowpass',1400,.4,.025,.07,350);osc(root*.8,'sine',.04,300,.025,.04);later(()=>noiseAt(3,.035,{f:280,fEnd:850,q:.45,att:1.1,send:.5}),5,12)},
-  river:()=>{src(NB,'bandpass',1700,.5,.08,.08,420);src(BR,'lowpass',520,.7,.25,.1,170);later(()=>noiseAt(.45,.032,{f:2100,fEnd:1100,q:1.8,pan:Math.random()*1.5-.75}),1.8,4.5)},
-  cave:()=>{src(BR,'lowpass',165,.65,.31,.025,48);osc(root*.5,'sine',.06,180,.02,.04);osc(root,'sine',.035,290,.02,.035);later(()=>toneAt(root*[1.5,2,3][Math.floor(Math.random()*3)],'sine',3.6,.025,{att:.4,send:1.1}),6,14);later(()=>toneAt(1700+Math.random()*900,'sine',.1,.02,{att:.005,fEnd:2600,send:.7}),3,7)},
-  birds:()=>{src(BR,'lowpass',480,.6,.11,.04,80);src(NB,'bandpass',2100,.7,.018,.06,360);later(()=>{const t=A.currentTime,n=2+Math.floor(Math.random()*3);for(let i=0;i<n;i++){const f=1800+Math.random()*1700;tone(f,'sine',t+i*.1,.09,.025,{...AT,fEnd:f*1.28,att:.008,pan:Math.random()*2-1})}},1.2,4)},
-  whale:()=>{src(BR,'lowpass',175,.7,.32,.025,45);osc(root*.72,'sine',.055,240,.025,.025);later(()=>{const f=rootOf(cur())*.72;toneAt(f,'sine',4.8,.045,{att:1.25,ramps:[[1.8,f*1.35],[3.5,f*.78]],vib:[2.8,f*.025],send:1,pan:Math.random()*1.2-.6})},11,22)},
-  bells:()=>{src(BR,'lowpass',220,.6,.045,.03,60);later(()=>{const f=root*[4,5,6,8][Math.floor(Math.random()*4)];toneAt(f,'sine',4.8,.038,{att:.01,send:1.35});toneAt(f*2.76,'sine',2.8,.016,{att:.01,send:1.1})},2.5,7);later(()=>noiseAt(.32,.012,{f:1400,q:1,att:.06,send:.8}),8,15)},
-  piano:()=>{src(BR,'lowpass',190,.6,.065,.04,55);const notes=[0,2,4,7,9];later(()=>{const f=root*Math.pow(2,notes[Math.floor(Math.random()*notes.length)]/12)*2;toneAt(f,'triangle',2.4,.045,{att:.008,fEnd:f*.985,lp:3100,send:.85,pan:Math.random()*1.5-.75});toneAt(f*2,'sine',.7,.012,{att:.01,send:.6})},1.3,3.5)},
-  heart:()=>{src(BR,'lowpass',115,.7,.08,.045,26);const beat=()=>{const t=A.currentTime;tone(54,'sine',t,.17,.095,{...AT,att:.01,fEnd:34});tone(56,'sine',t+.27,.2,.065,{...AT,att:.01,fEnd:38})};beat();later(beat,1.15,1.4)},
-  drone:()=>{osc(root,'sine',.075,320,.025,.025);osc(root*1.5,'triangle',.046,420,.018,.022);osc(root*2,'sine',.035,560,.028,.018);osc(root*2.5,'sine',.022,620,.025,.016);src(NB,'lowpass',300,.7,.008,.04,80)},
-  temple:()=>{osc(root*.5,'sine',.06,210,.018,.02);osc(root,'sine',.035,390,.022,.016);later(()=>{toneAt(root*4,'sine',5.5,.024,{att:.35,send:1.5});toneAt(root*5.2,'sine',4.8,.016,{att:.45,send:1.5})},7,15)},
-  underwater:()=>{src(BR,'lowpass',230,.8,.34,.035,44);osc(root*1.4,'sine',.04,360,.025,.04);later(()=>{const t=A.currentTime,n=2+Math.floor(Math.random()*3);for(let i=0;i<n;i++){const f=320+Math.random()*260;tone(f,'sine',t+i*.16,.32,.018,{...AT,fEnd:f*1.65,send:.75,pan:Math.random()*2-1})}},1,3.5)},
-  snow:()=>{src(BR,'lowpass',220,.7,.16,.04,45);osc(root*2,'sine',.026,520,.022,.018);later(()=>toneAt(root*[6,8,10,12][Math.floor(Math.random()*4)],'sine',1.4,.016,{att:.015,send:1,pan:Math.random()*2-1}),3,8)},
-  fireflies:()=>{src(BR,'lowpass',290,.6,.1,.03,60);osc(root*3,'sine',.024,520,.035,.016);later(()=>toneAt(root*[8,10,12,15,16][Math.floor(Math.random()*5)],'sine',1.25,.018,{att:.02,send:1,pan:Math.random()*2-1}),1,4)}
- };
- try{
-  (builders[mode]||builders.ocean)();
-  /* Immediate, mode-specific acoustic signature. The ambient layers then continue underneath it. */
-  const cue=()=>{
-   const t=A.currentTime+.025,pan=(Math.random()-.5)*.55;
-   switch(mode){
-    case 'ocean':noise(t,.72,.075,{...AT,brown:1,type:'lowpass',f:520,fEnd:170,att:.22,send:.45});tone(root*2,'sine',t+.04,.95,.045,{...AT,fEnd:root*1.35,att:.12,send:.6,pan});break;
-    case 'space':tone(root*4,'sine',t,1.45,.06,{...AT,att:.02,fEnd:root*4.02,send:1,pan});tone(root*6,'sine',t+.18,.9,.028,{...AT,send:1,pan:-pan});break;
-    case 'rain':noise(t,.58,.095,{...AT,type:'highpass',f:4100,fEnd:1900,q:.8,att:.025,pan});break;
-    case 'storm':noise(t,1.05,.15,{...AT,brown:1,type:'lowpass',f:150,fEnd:520,q:.65,att:.25});tone(52,'sine',t,.8,.09,{...AT,fEnd:36,att:.06});break;
-    case 'forest':tone(2450,'sine',t,.18,.055,{...AT,fEnd:3150,att:.008,pan});tone(1850,'sine',t+.14,.22,.045,{...AT,fEnd:2450,att:.01,pan:-pan});break;
-    case 'night':tone(3600,'sine',t,.1,.04,{...AT,fEnd:4400,att:.004,pan});tone(3900,'sine',t+.14,.1,.035,{...AT,fEnd:3300,att:.004,pan:-pan});break;
-    case 'fire':noise(t,.14,.11,{...AT,type:'highpass',f:2600,fEnd:900,q:.8,att:.003,pan});break;
-    case 'wind':noise(t,1.1,.105,{...AT,brown:1,type:'bandpass',f:340,fEnd:900,q:.5,att:.42});break;
-    case 'river':noise(t,.7,.09,{...AT,type:'bandpass',f:1450,fEnd:2600,q:.45,att:.09,pan});break;
-    case 'cave':tone(430,'sine',t,.65,.065,{...AT,fEnd:370,att:.012,send:1.1});tone(640,'sine',t+.12,.8,.035,{...AT,fEnd:590,att:.04,send:1.3});break;
-    case 'birds':tone(2350,'sine',t,.14,.065,{...AT,fEnd:3350,att:.006,pan});tone(3150,'sine',t+.14,.18,.05,{...AT,fEnd:2600,att:.006,pan:-pan});break;
-    case 'whale':tone(root*.72,'sine',t,2.2,.075,{...AT,fEnd:root*1.05,att:.55,vib:[2.6,root*.035],send:1,pan});break;
-    case 'bells':tone(root*5,'sine',t,2.4,.075,{...AT,att:.008,send:1.3});tone(root*5*2.76,'sine',t+.01,1.6,.028,{...AT,att:.01,send:1.1});break;
-    case 'piano':tone(root*2,'triangle',t,1.5,.085,{...AT,att:.006,fEnd:root*1.98,lp:3200,send:.9,pan});break;
-    case 'heart':tone(54,'sine',t,.18,.15,{...AT,att:.008,fEnd:34});tone(56,'sine',t+.24,.22,.11,{...AT,att:.008,fEnd:37});break;
-    case 'drone':tone(root,'sine',t,2.1,.075,{...AT,att:.3,send:.8});tone(root*1.5,'triangle',t+.03,2,.045,{...AT,att:.35,send:.8});break;
-    case 'temple':tone(root*4,'sine',t,3,.06,{...AT,att:.22,send:1.5});tone(root*5.2,'sine',t+.16,2.7,.035,{...AT,att:.28,send:1.5});break;
-    case 'underwater':tone(360,'sine',t,.26,.055,{...AT,fEnd:680,att:.018,send:.9,pan});tone(490,'sine',t+.18,.3,.04,{...AT,fEnd:760,att:.02,send:.8,pan:-pan});break;
-    case 'snow':tone(1900,'sine',t,1.1,.045,{...AT,att:.01,fEnd:2400,send:1,pan});break;
-    case 'fireflies':tone(root*9,'sine',t,1.15,.04,{...AT,att:.02,fEnd:root*10,send:1,pan});tone(root*12,'sine',t+.12,.75,.025,{...AT,att:.02,send:.9,pan:-pan});break;
-   }
-  };
-  cue();
- }catch(e){toast('تعذّر تشغيل الصوت الخلفي');ambStop()}
+ const A=AC,gen=ambGen,root=rootOf(cur()),out=A.createGain();out.gain.setValueAtTime(.0001,A.currentTime);out.gain.linearRampToValueAtTime(.11,A.currentTime+2.2);out.connect(AB);ambOut=out;
+ const presets={ocean:[110,165,220],space:[82.4,123.5,164.8],rain:[196,246.9,293.7],storm:[73.4,110,146.8],forest:[146.8,220,293.7],night:[130.8,196,261.6],fire:[98,146.8,196],wind:[123.5,185,246.9],river:[164.8,220,329.6],cave:[82.4,110,164.8],birds:[220,293.7,440],whale:[55,82.4,110],bells:[261.6,392,523.3],piano:[196,293.7,392],heart:[73.4,110,146.8],drone:[110,165,220],temple:[98,146.8,196],underwater:[82.4,123.5,185],snow:[174.6,220,261.6],fireflies:[246.9,329.6,392]};
+ const freqs=presets[mode]||presets.ocean;
+ freqs.forEach((f,i)=>{const osc=A.createOscillator(),gain=A.createGain(),lfo=A.createOscillator(),mod=A.createGain();osc.type='sine';osc.frequency.value=f;gain.gain.value=[.28,.17,.11][i];lfo.type='sine';lfo.frequency.value=.07+i*.025;mod.gain.value=.035; lfo.connect(mod);mod.connect(gain.gain);osc.connect(gain);gain.connect(out);osc.start();lfo.start();ambNodes.push(osc,lfo)});
 }
+
 function gest(){if(AC&&AC.state==='running'&&!ambOut&&S.amb&&S.amb!=='off'&&!S.mute)ambStart()}
 if(typeof document.addEventListener=='function'){
 document.addEventListener('pointerdown',e=>{gest();const t=e.target.closest&&e.target.closest('.chip,.btn,nav button,.ck');if(!t)return;const r=t.getBoundingClientRect(),d=Math.max(r.width,r.height)*2,sp=document.createElement('span');sp.className='rpl';sp.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';t.appendChild(sp);setTimeout(()=>sp.remove(),560)},true);

@@ -19,7 +19,7 @@ android {
         applicationId 'com.myspace.app'
         minSdk 24
         targetSdk 35
-        versionCode 16024
+        versionCode 16025
         versionName '3.0'
     }
 

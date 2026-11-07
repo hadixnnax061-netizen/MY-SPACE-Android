@@ -171,6 +171,12 @@ public final class GeminiBridge {
     }
 
     @JavascriptInterface
+    public void shareText(String text) {
+        if (text == null || text.length() > 6000) return;
+        activity.runOnUiThread(() -> activity.shareText(text));
+    }
+
+    @JavascriptInterface
     public void openUrl(String url) {
         activity.runOnUiThread(() -> activity.openExternalUrl(url));
     }
@@ -181,20 +187,103 @@ public final class GeminiBridge {
     }
 
     @JavascriptInterface
+    public void setDailyReminder(String id, String payload) {
+        if (id == null || id.isEmpty() || id.length() > 80) return;
+        try {
+            JSONObject input = parseObject(payload);
+            boolean enabled = input.optBoolean("enabled", false);
+            int hour = input.optInt("hour", -1);
+            int minute = input.optInt("minute", -1);
+            if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                deliver(id, Envelope.error(400, "اختر وقتًا صالحًا للتذكير."));
+                return;
+            }
+            String name = input.optString("starName", "نجمك")
+                    .replaceAll("[\\p{Cntrl}<>\\\"'`]+", "").trim();
+            if (name.length() > 40) name = name.substring(0, 40);
+            final String cleanName = name;
+            String mode = input.optString("mode", "gentle");
+            if (!"quran".equals(mode) && !"space".equals(mode)) mode = "gentle";
+            final String cleanMode = mode;
+            activity.runOnUiThread(() -> activity.configureDailyReminder(
+                    id, enabled, hour, minute, cleanName, cleanMode));
+        } catch (Exception e) {
+            deliver(id, Envelope.error(400, "تعذّر قراءة إعداد التذكير."));
+        }
+    }
+
+    void completeDailyReminder(String id, int status, String message) {
+        if (id == null || id.isEmpty() || id.length() > 80) return;
+        if (status >= 200 && status < 300) {
+            JSONObject body = new JSONObject();
+            try {
+                body.put("ok", true);
+                body.put("message", message);
+            } catch (JSONException ignored) {}
+            deliver(id, Envelope.ok(body));
+        } else {
+            deliver(id, Envelope.error(status, message));
+        }
+    }
+
+    @JavascriptInterface
     public void widgetData(String payload) {
         try {
+            if (payload == null || payload.length() > 512 * 1024) return;
             JSONObject input = new JSONObject(payload == null ? "{}" : payload);
             JSONObject clean = new JSONObject();
-            String name = input.optString("name", "MY SPACE");
-            if (name.length() > 60) name = name.substring(0, 60);
-            clean.put("name", name);
-            clean.put("pct", Math.max(0, Math.min(100, input.optInt("pct", 0))));
-            clean.put("stage", input.optString("stage", "").substring(0,
-                    Math.min(40, input.optString("stage", "").length())));
-            clean.put("c1", input.optString("c1", "#36e7dc"));
-            clean.put("c2", input.optString("c2", "#008080"));
-            clean.put("c3", input.optString("c3", "#e0b252"));
-            clean.put("shape", input.optString("shape", "sphere"));
+            JSONArray source = input.optJSONArray("stars");
+            JSONArray stars = new JSONArray();
+            if (source != null) {
+                for (int i = 0; i < Math.min(64, source.length()); i++) {
+                    JSONObject item = source.optJSONObject(i);
+                    if (item == null) continue;
+                    String id = item.optString("id", "");
+                    if (!id.matches("[A-Za-z0-9_-]{1,80}")) continue;
+                    JSONObject body = new JSONObject();
+                    String name = item.optString("name", "MY SPACE").replaceAll("[\\p{Cntrl}<>\\\"'`]+", "");
+                    if (name.length() > 60) name = name.substring(0, 60);
+                    body.put("id", id);
+                    body.put("name", name);
+                    body.put("kind", "star".equals(item.optString("kind", "planet")) ? "star" : "planet");
+                    String shape = item.optString("shape", "sphere");
+                    body.put("shape", shape.matches("[A-Za-z0-9_-]{1,32}") ? shape : "sphere");
+                    body.put("pct", Math.max(0, Math.min(100, item.optInt("pct", 0))));
+                    String stage = item.optString("stage", "");
+                    body.put("stage", stage.substring(0, Math.min(40, stage.length())));
+                    body.put("c1", PlanetWidgetProvider.safeColor(item.optString("c1", "#36e7dc"), "#36e7dc"));
+                    body.put("c2", PlanetWidgetProvider.safeColor(item.optString("c2", "#008080"), "#008080"));
+                    body.put("c3", PlanetWidgetProvider.safeColor(item.optString("c3", "#e0b252"), "#e0b252"));
+                    stars.put(body);
+                }
+            }
+            if (stars.length() == 0) {
+                JSONObject body = new JSONObject();
+                String id = input.optString("id", "AETHER");
+                if (!id.matches("[A-Za-z0-9_-]{1,80}")) id = "AETHER";
+                body.put("id", id);
+                String name = input.optString("name", "MY SPACE").replaceAll("[\\p{Cntrl}<>\\\"'`]+", "");
+                if (name.length() > 60) name = name.substring(0, 60);
+                body.put("name", name);
+                String shape = input.optString("shape", "sphere");
+                if (!shape.matches("[A-Za-z0-9_-]{1,32}")) shape = "sphere";
+                body.put("kind", "star".equals(shape) || "supernova".equals(shape)
+                        || "pulsar".equals(shape) || "binary".equals(shape) ? "star" : "planet");
+                body.put("shape", shape);
+                body.put("pct", Math.max(0, Math.min(100, input.optInt("pct", 0))));
+                String stage = input.optString("stage", "");
+                body.put("stage", stage.substring(0, Math.min(40, stage.length())));
+                body.put("c1", PlanetWidgetProvider.safeColor(input.optString("c1", "#36e7dc"), "#36e7dc"));
+                body.put("c2", PlanetWidgetProvider.safeColor(input.optString("c2", "#008080"), "#008080"));
+                body.put("c3", PlanetWidgetProvider.safeColor(input.optString("c3", "#e0b252"), "#e0b252"));
+                stars.put(body);
+            }
+            String defaultId = input.optString("defaultId", "");
+            if (defaultId.length() > 80 || !defaultId.matches("[A-Za-z0-9_-]{1,80}")) {
+                defaultId = stars.optJSONObject(0).optString("id", "AETHER");
+            }
+            clean.put("defaultId", defaultId);
+            clean.put("stars", stars);
             PlanetWidgetProvider.store(activity, clean.toString());
         } catch (Exception ignored) {
         }
@@ -326,7 +415,8 @@ public final class GeminiBridge {
                 + "أجب بالعربية الواضحة القريبة من المستخدم ما لم يطلب لغة أخرى. كن محادثياً وطبيعياً، وأجب عن مضمون السؤال فعلاً، ولا تجعل كل رد شعراً. "
                 + "استخدم سياق التطبيق أدناه باعتباره بيانات موثوقة عن النجم فقط. لا تخترع إنجازات أو ذكريات أو معلومات عن المستخدم. إذا لم تجد معلومة فقل إنك لا تعرفها. "
                 + "لا تزعم أنك عدّلت المهام أو التصميم بنفسك؛ يمكنك اقتراح التغيير وشرح طريقة تنفيذه. لا تطلب كلمة مرور أو مفتاح API. "
-                + "اجعل الرد مناسباً للمحادثة، غالباً من فقرة إلى ثلاث فقرات، واسأل سؤال متابعة واحداً عندما يكون مفيداً.\n\n"
+                + "اجعل الرد مناسباً للمحادثة، غالباً من فقرة إلى ثلاث فقرات، واسأل سؤال متابعة واحداً عندما يكون مفيداً. "
+                + "في المسائل الدينية لا تختلق آيات أو أحاديث ولا تنسب قولاً لمصدر بلا تحقق؛ ميّز الحكمة المنسوبة من الحديث، ولا تقدّم فتوى أو تفسيراً جازماً. إذا لم تملك مصدرًا موثوقًا فقل إنك لا تستطيع التحقق. في العلوم ميّز الحقيقة عن الاستعارة، واذكر المصدر أو حدود اليقين عند الحاجة.\n\n"
                 + "سياق MY SPACE الحالي (JSON):\n" + context;
     }
 

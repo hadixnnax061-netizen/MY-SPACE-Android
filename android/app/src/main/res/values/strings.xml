@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MY SPACE</string>
-    <string name="widget_name">كوكب MY SPACE</string>
-    <string name="widget_description">كوكبك وتقدّمك على الشاشة الرئيسية</string>
+    <string name="widget_name">جرم MY SPACE</string>
+    <string name="widget_description">كوكبك أو نجمك وساعته على الشاشة الرئيسية</string>
+    <string name="widget_configure">إعداد الجرم والتوقيت</string>
+    <string name="widget_configure_title">إعداد ويدجت MY SPACE</string>
 </resources>

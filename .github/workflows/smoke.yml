@@ -7,26 +7,45 @@ on:
     types: [completed]
 
 permissions:
-  contents: write
+  actions: read
+  contents: read
 
 jobs:
   emulator:
-    name: Boot emulator and launch APK
+    name: Boot emulator and launch the APK from this workflow run
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Select the Android build run
+        id: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_EVENT: ${{ github.event_name }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          if [ "$RUN_EVENT" = "workflow_run" ]; then
+            echo "run_id=$SOURCE_RUN_ID" >> "$GITHUB_OUTPUT"
+          else
+            RUN_ID=$(gh run list --workflow android.yml --status success --limit 1 \
+              --json databaseId --jq '.[0].databaseId' \
+              -R "$GITHUB_REPOSITORY")
+            test -n "$RUN_ID"
+            echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Download latest APK
+      - name: Download APK artifact from selected build
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download latest \
-            -R hadixnnax061-netizen/MY-SPACE-Android \
-            -p 'MY-SPACE-v16.2.apk' -O app.apk --clobber
+          set -euo pipefail
+          mkdir -p build-artifact
+          gh run download "${{ steps.build.outputs.run_id }}" \
+            -R "$GITHUB_REPOSITORY" -n MY-SPACE-APK -D build-artifact
+          cp build-artifact/MY-SPACE-v3.0-debug.apk app.apk
+          test -s app.apk
           ls -lh app.apk
 
       - name: Enable KVM
@@ -46,42 +65,28 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
+            set -euo pipefail
             adb shell wm dismiss-keyguard || true
-            adb install -r app.apk || true
-            adb logcat -c || true
-            adb shell am start -W -n com.myspace.app/.MainActivity || true
+            adb install -r app.apk
+            adb logcat -c
+            adb shell am start -W -n com.myspace.app/.MainActivity
             sleep 15
-            echo "--- pid ---"
-            adb shell pidof com.myspace.app || true
-            echo "--- top activity ---"
-            adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -2 || true
-            echo "--- widget provider ---"
-            adb shell dumpsys appwidget | grep -i "com.myspace" || true
-            adb shell dumpsys package com.myspace.app | grep -i "PlanetWidgetProvider" || true
-            echo "--- crash log ---"
-            adb logcat -d -v threadtime > logcat.txt || true
-            grep -E "FATAL EXCEPTION|AndroidRuntime|com.myspace|MySpace|MYSPACE" logcat.txt | tail -160 || true
-            adb shell input tap 540 700 || true
-            sleep 3
-            adb exec-out screencap -p > screenshot.png || true
-            test -s screenshot.png || true
-            grep -q "FATAL EXCEPTION" logcat.txt && exit 1 || true
-            adb shell pidof com.myspace.app
+            PID=$(adb shell pidof com.myspace.app | tr -d '\r')
+            test -n "$PID"
+            adb logcat -d -v threadtime > logcat.txt
+            if grep -q "FATAL EXCEPTION" logcat.txt; then
+              grep -E "FATAL EXCEPTION|AndroidRuntime|com.myspace|MySpace|MYSPACE" logcat.txt | tail -160
+              exit 1
+            fi
+            adb exec-out screencap -p > screenshot.png
+            test -s screenshot.png
 
       - name: Upload screenshot and logcat
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: MY-SPACE-screenshot
+          name: MY-SPACE-smoke-${{ steps.build.outputs.run_id }}
           path: |
             screenshot.png
             logcat.txt
           if-no-files-found: warn
-
-      - name: Attach screenshot to latest release
-        if: success()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release upload latest screenshot.png --clobber
-          -R hadixnnax061-netizen/MY-SPACE-Android

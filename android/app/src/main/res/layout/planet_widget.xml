@@ -13,25 +13,93 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:minHeight="72dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/widget_name" />
 
     <TextView
         android:id="@+id/widget_name"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textColor="#E6F4F3"
-        android:textSize="15sp"
+        android:textColor="#EDF5F8"
+        android:textSize="14sp"
         android:textStyle="bold"
         android:text="AETHER" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextClock
+            android:id="@+id/widget_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="h:mm a"
+            android:format24Hour="HH:mm"
+            android:textColor="#D8E8EE"
+            android:textSize="12sp"
+            android:fontFeatureSettings="tnum" />
+
+        <TextView
+            android:id="@+id/widget_zone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#8FA9B2"
+            android:textSize="10sp"
+            android:text="توقيت الجهاز" />
+
+        <TextView
+            android:id="@+id/widget_rotate"
+            android:layout_width="32dp"
+            android:layout_height="34dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="تدوير الكوكب أو النجم"
+            android:gravity="center"
+            android:text="↻"
+            android:textColor="#62F1E6"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/widget_config"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/widget_configure"
+            android:gravity="center"
+            android:text="⚙"
+            android:textColor="#62F1E6"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/widget_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginTop="4dp"
+        android:max="100"
+        android:progress="0"
+        android:progressBackgroundTint="#293945"
+        android:progressTint="#62F1E6"
+        android:contentDescription="نسبة التقدم" />
 
     <TextView
         android:id="@+id/widget_pct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#36E7DC"
-        android:textSize="13sp"
+        android:textColor="#62F1E6"
+        android:textSize="11sp"
         android:text="0%" />
 </LinearLayout>

@@ -81,6 +81,10 @@
     });
   }
 
+  window.__myspaceSetDailyReminder = function (payload) {
+    return call('setDailyReminder', JSON.stringify(payload || {})).then(toResponse);
+  };
+
   var nativeFetch = window.fetch ? window.fetch.bind(window) : null;
 
   window.fetch = function (input, init) {
@@ -234,27 +238,41 @@
     } catch (e) {}
   };
 
-  /* Keep the home-screen planet widget in sync with the active star. */
+  /* Keep the native catalog in sync without tying every widget to the active body. */
   function syncPlanetWidget() {
     try {
-      if (typeof cur !== 'function' || typeof avg !== 'function') return;
-      var star = cur();
-      if (!star) return;
-      var look = (typeof eff === 'function') ? eff(star) : (star.base || {});
-      if (!look || !look.c1) return;
-      var data = {
-        name: String(star.name || 'MY SPACE').slice(0, 60),
-        pct: Math.round(avg(star)),
-        stage: (typeof STG !== 'undefined' && typeof stage === 'function')
-          ? String(STG[stage(star)] || '') : '',
-        c1: look.c1,
-        c2: look.c2,
-        c3: look.c3,
-        shape: look.shape || 'sphere'
-      };
-      NATIVE.widgetData(JSON.stringify(data));
+      if (typeof S === 'undefined' || !Array.isArray(S.stars) || !S.stars.length
+          || typeof avg !== 'function' || typeof eff !== 'function') return;
+      var active = (typeof cur === 'function' && cur()) || S.stars[0];
+      var defaultId = String(S.widgetStarId || (active && active.id) || S.stars[0].id).slice(0, 80);
+      var selected = S.stars.find(function (body) { return String(body.id) === defaultId; });
+      var source = S.stars.slice(0, 64);
+      if (selected && !source.some(function (body) { return body && String(body.id) === defaultId; })) {
+        if (source.length >= 64) source[63] = selected; else source.push(selected);
+      }
+      var entries = source.map(function (body) {
+        if (!body || !body.id) return null;
+        var look = eff(body);
+        if (!look || !look.c1) return null;
+        return {
+          id: String(body.id).slice(0, 80),
+          name: String(body.name || 'MY SPACE').slice(0, 60),
+          kind: body.kind === 'star' ? 'star' : 'planet',
+          shape: String(look.shape || 'sphere').slice(0, 32),
+          pct: Math.max(0, Math.min(100, Math.round(avg(body)))),
+          stage: (typeof STG !== 'undefined' && typeof stage === 'function')
+            ? String(STG[stage(body)] || '').slice(0, 40) : '',
+          c1: look.c1,
+          c2: look.c2,
+          c3: look.c3
+        };
+      }).filter(Boolean);
+      if (!entries.length) return;
+      if (!entries.some(function (body) { return body.id === defaultId; })) defaultId = entries[0].id;
+      NATIVE.widgetData(JSON.stringify({ defaultId: defaultId, stars: entries }));
     } catch (e) {}
   }
+  window.__myspaceSyncWidgetNow = syncPlanetWidget;
   setTimeout(syncPlanetWidget, 5000);
   setInterval(syncPlanetWidget, 30000);
   document.addEventListener('visibilitychange', function () {

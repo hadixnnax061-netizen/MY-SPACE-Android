@@ -1,6 +1,6 @@
 {
   "id": "./index.html",
-  "name": "MY SPACE — Gemini Living Cosmos v16.2",
+  "name": "MY SPACE — Gemini Living Cosmos v3.0",
   "short_name": "MY SPACE AI",
   "description": "حوار مع النجم والكوكب عبر Gemini، وTexter للكتابة والقراءة الصوتية.",
   "lang": "ar",
@@ -9,8 +9,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#03070f",
-  "theme_color": "#03070f",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "./icons/icon-192.png",
